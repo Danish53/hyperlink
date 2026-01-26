@@ -1,0 +1,847 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import Header from '../shared/header';
+import Footer from '../shared/footer';
+import { X, ChevronUp, ChevronDown } from 'lucide-react';
+import TradingViewChart from './TradingViewChart';
+
+interface Order {
+  id: number;
+  symbol: string;
+  amount: number;
+  type: 'BUY' | 'SELL';
+  orderType: 'Limit' | 'Market';
+  pnl: string;
+  autoSell: string;
+  status: 'filled' | 'pending' | 'cancelled';
+  filledPrice?: number;
+  timestamp: number;
+}
+
+interface Balance {
+  [key: string]: number;
+}
+
+interface Notification {
+  id: number;
+  type: 'success' | 'error' | 'info' | 'warning';
+  title: string;
+  message: string;
+}
+
+interface CoinData {
+  symbol: string;
+  price: number;
+  change24h: number;
+  high24h: number;
+  low24h: number;
+}
+
+const Chart = ({ session }: { session: any }) => {
+  const [activeTableTab, setActiveTableTab] = useState('Positions');
+  const [selectedCoin, setSelectedCoin] = useState('BTC');
+  const [orderType, setOrderType] = useState<'Limit' | 'Market'>('Market');
+  const [amount, setAmount] = useState(0);
+  const [price, setPrice] = useState<number | string>('');
+  const [stopLoss, setStopLoss] = useState<number | string>('');
+  const [leverage, setLeverage] = useState(10);
+  const [showCalculator, setShowCalculator] = useState(false);
+  const [autoSell, setAutoSell] = useState('OFF');
+  const [mockOrders, setMockOrders] = useState<Order[]>([]);
+  const [utcTime, setUtcTime] = useState('');
+  const [open, setOpen] = useState(false);
+
+  // Dummy account balances
+  const [balances, setBalances] = useState<Balance>({
+    BTC: 0.5234,
+    ETH: 5.8921,
+    USDT: 25000.5,
+  });
+
+  // Realistic crypto prices
+  const [coinPrices, setCoinPrices] = useState<{ [key: string]: CoinData }>({
+    BTC: {
+      symbol: 'BTC/USDT',
+      price: 108234.56,
+      change24h: -2.11,
+      high24h: 111290,
+      low24h: 106710,
+    },
+    ETH: {
+      symbol: 'ETH/USDT',
+      price: 3456.78,
+      change24h: 1.45,
+      high24h: 3520,
+      low24h: 3400,
+    },
+    USDT: {
+      symbol: 'USDT/USDT',
+      price: 1.0,
+      change24h: 0,
+      high24h: 1.01,
+      low24h: 0.99,
+    },
+  });
+
+  const [pendingOrders, setPendingOrders] = useState<Order[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+
+  // Update time
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      const hoursNum = now.getUTCHours();
+      const hours = hoursNum.toString().padStart(2, '0');
+      const minutes = now.getUTCMinutes().toString().padStart(2, '0');
+      const seconds = now.getUTCSeconds().toString().padStart(2, '0');
+      const ampm = hoursNum >= 12 ? 'PM' : 'AM';
+      const hour12 = (hoursNum % 12 || 12).toString().padStart(2, '0');
+
+      setUtcTime(`${hour12}:${minutes}:${seconds} ${ampm}`);
+    };
+
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Simulate realistic price movements
+  useEffect(() => {
+    const priceInterval = setInterval(() => {
+      setCoinPrices((prev) => {
+        const updated = { ...prev };
+        Object.keys(updated).forEach((coin) => {
+          if (coin !== 'USDT') {
+            const volatility = 0.002;
+            const change = (Math.random() - 0.5) * 2 * volatility;
+            const newPrice = updated[coin].price * (1 + change);
+            updated[coin] = {
+              ...updated[coin],
+              price: parseFloat(newPrice.toFixed(2)),
+            };
+          }
+        });
+        return updated;
+      });
+    }, 3000);
+
+    return () => clearInterval(priceInterval);
+  }, []);
+
+  const showNotification = (
+    type: 'success' | 'error' | 'info' | 'warning',
+    title: string,
+    message: string,
+  ) => {
+    const id = Date.now();
+    const notification: Notification = { id, type, title, message };
+    setNotifications((prev) => [...prev, notification]);
+
+    setTimeout(() => {
+      setNotifications((prev) => prev.filter((n) => n.id !== id));
+    }, 5000);
+  };
+
+  const removeNotification = (id: number) => {
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  };
+
+  // Get current market price with slight variance
+  const getCurrentMarketPrice = (): number => {
+    const basePrice = coinPrices[selectedCoin]?.price || 100000;
+    const variance = basePrice * 0.0005; // 0.05% variance
+    return basePrice + (Math.random() - 0.5) * variance * 2;
+  };
+
+  // Handle Limit Order
+  const handleLimitOrder = (orderData: Order) => {
+    setPendingOrders((prev) => [...prev, { ...orderData, status: 'pending' }]);
+
+    setTimeout(() => {
+      const currentPrice = getCurrentMarketPrice();
+      const targetPrice = Number(orderData.filledPrice || orderData.amount);
+      const priceRange = targetPrice * 0.02; // 2% price range
+
+      const isPriceMatched =
+        orderData.type === 'BUY'
+          ? currentPrice <= targetPrice + priceRange
+          : currentPrice >= targetPrice - priceRange;
+
+      if (isPriceMatched) {
+        executeTrade(orderData, currentPrice, 'filled');
+        setPendingOrders((prev) => prev.filter((o) => o.id !== orderData.id));
+        showNotification(
+          'success',
+          'Order Filled',
+          `Limit order for ${orderData.symbol} filled at $${currentPrice.toFixed(2)}`,
+        );
+      } else {
+        setPendingOrders((prev) =>
+          prev.map((o) => (o.id === orderData.id ? { ...o, status: 'pending' } : o)),
+        );
+      }
+    }, 2000);
+  };
+
+  const handleMarketOrder = (orderData: Order) => {
+    const currentPrice = getCurrentMarketPrice();
+    executeTrade(orderData, currentPrice, 'filled');
+  };
+
+  const executeTrade = (orderData: Order, filledPrice: number, status: 'filled' | 'cancelled') => {
+    const quantity = orderData.amount;
+    const positionValue = quantity * filledPrice;
+    const fee = positionValue * 0.001; // 0.1% trading fee
+
+    setBalances((prev) => {
+      const newBalances = { ...prev };
+      const baseCoin = selectedCoin;
+
+      if (orderData.type === 'BUY') {
+        newBalances.USDT = (newBalances.USDT || 0) - (positionValue + fee);
+        newBalances[baseCoin] = (newBalances[baseCoin] || 0) + quantity;
+      } else if (orderData.type === 'SELL') {
+        newBalances.USDT = (newBalances.USDT || 0) + (positionValue - fee);
+        newBalances[baseCoin] = (newBalances[baseCoin] || 0) - quantity;
+      }
+
+      // Prevent negative balances
+      Object.keys(newBalances).forEach((key) => {
+        if (newBalances[key] < 0.00001) newBalances[key] = 0;
+      });
+
+      return newBalances;
+    });
+
+    // Generate realistic PnL (typically between -3% to +3% on market orders)
+    const pnlPercent = (Math.random() * 6 - 3).toFixed(2);
+    const executedOrder: Order = {
+      ...orderData,
+      status,
+      filledPrice,
+      pnl: `${pnlPercent}%`,
+    };
+
+    setMockOrders((prev) => [executedOrder, ...prev]);
+  };
+
+  const validateOrder = (buyAmount: number, orderPrice: string | number): boolean => {
+    if (!buyAmount || buyAmount <= 0) {
+      showNotification('error', 'Invalid Amount', 'Please enter a valid amount');
+      return false;
+    }
+
+    if (orderType === 'Limit' && (!orderPrice || Number(orderPrice) <= 0)) {
+      showNotification('error', 'Invalid Price', 'Please enter a valid limit price');
+      return false;
+    }
+
+    const effectivePrice = orderType === 'Market' ? getCurrentMarketPrice() : Number(orderPrice);
+    const requiredBalance = buyAmount * effectivePrice;
+
+    if (selectedCoin === 'USDT' && balances.USDT < buyAmount) {
+      showNotification(
+        'error',
+        'Insufficient Balance',
+        `Required: ${buyAmount.toFixed(2)} USDT, Available: ${balances.USDT.toFixed(2)} USDT`,
+      );
+      return false;
+    }
+
+    if (selectedCoin !== 'USDT' && balances[selectedCoin] < buyAmount) {
+      showNotification(
+        'error',
+        'Insufficient Balance',
+        `Required: ${buyAmount.toFixed(4)} ${selectedCoin}, Available: ${balances[
+          selectedCoin
+        ].toFixed(4)} ${selectedCoin}`,
+      );
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleOrderSubmit = (type: 'BUY' | 'SELL') => {
+    if (amount <= 0) {
+      showNotification('error', 'Invalid Amount', 'Please enter an amount greater than 0');
+      return;
+    }
+
+    const orderPrice = orderType === 'Market' ? getCurrentMarketPrice() : Number(price || amount);
+
+    if (!validateOrder(amount, orderPrice)) return;
+
+    const order: Order = {
+      id: Date.now(),
+      symbol: `${selectedCoin}/USDT`,
+      type,
+      orderType,
+      amount: amount,
+      filledPrice: orderPrice,
+      pnl: '0%',
+      autoSell,
+      status: 'pending',
+      timestamp: Date.now(),
+    };
+
+    if (orderType === 'Limit') {
+      handleLimitOrder(order);
+      showNotification(
+        'info',
+        'Limit Order Placed',
+        `${type} ${amount} ${selectedCoin} at $${orderPrice.toFixed(2)} - waiting for price match`,
+      );
+    } else {
+      handleMarketOrder(order);
+      showNotification(
+        'success',
+        'Market Order Executed',
+        `${type} ${amount.toFixed(4)} ${selectedCoin} at $${orderPrice.toFixed(2)}`,
+      );
+    }
+
+    setAmount(0);
+    setPrice('');
+  };
+
+  const handleSlider = (value: string) => {
+    const percent = parseInt(value, 10);
+    const maxAmount = balances[selectedCoin] || 0;
+    setAmount(parseFloat(((percent / 100) * maxAmount).toFixed(4)));
+  };
+
+  const cancelPendingOrder = (orderId: number) => {
+    setPendingOrders((prev) => prev.filter((o) => o.id !== orderId));
+    setMockOrders((prev) =>
+      prev.map((o) => (o.id === orderId ? { ...o, status: 'cancelled' } : o)),
+    );
+    showNotification('warning', 'Order Cancelled', 'Pending order has been cancelled');
+  };
+
+  const renderTableRows = () => {
+    const displayOrders =
+      activeTableTab === 'Positions'
+        ? mockOrders.filter((o) => o.status === 'filled')
+        : mockOrders.filter((o) => o.status !== 'cancelled');
+
+    if (displayOrders.length === 0)
+      return (
+        <tr>
+          <td colSpan={11} className="text-center py-6 text-gray-500">
+            No {activeTableTab.toLowerCase()} yet
+          </td>
+        </tr>
+      );
+
+    return displayOrders.map((order) => (
+      <tr key={order.id} className="border-b border-[#242424] hover:bg-[#2a2a2a]">
+        <td className="px-2 py-2 font-semibold">{order.symbol}</td>
+        <td className="px-2 py-2">{order.amount.toFixed(4)}</td>
+        <td className="px-2 py-2">{leverage}x</td>
+        <td className="px-2 py-2">${(order.filledPrice || 0).toFixed(2)}</td>
+        <td className="px-2 py-2">${((order.filledPrice || 0) * 0.95).toFixed(2)}</td>
+        <td className="px-2 py-2">${((order.filledPrice || 0) * 0.9).toFixed(2)}</td>
+        <td className="px-2 py-2">
+          <button className="text-[#50D2C1] hover:underline text-xs">Limit</button>
+        </td>
+        <td className="px-2 py-2">
+          <button className="text-red-400 hover:underline text-xs">Market</button>
+        </td>
+        <td
+          className={`px-2 py-2 font-semibold ${
+            order.pnl.includes('-') ? 'text-red-500' : 'text-green-500'
+          }`}
+        >
+          {order.pnl}
+        </td>
+      </tr>
+    ));
+  };
+
+  const getNotificationStyles = (type: Notification['type']) => {
+    const styles = {
+      success: 'bg-green-500/20 border-green-500/50 text-green-400',
+      error: 'bg-red-500/20 border-red-500/50 text-red-400',
+      warning: 'bg-[#50D2C1]/20 border-[#50D2C1]/50 text-[#50D2C1]',
+      info: 'bg-blue-500/20 border-blue-500/50 text-blue-400',
+    };
+    return styles[type];
+  };
+
+  const currentCoin = coinPrices[selectedCoin];
+  const isNegativeChange = currentCoin?.change24h < 0;
+
+  return (
+    <div className="text-white bg-[#1a1a1a] min-h-screen">
+      <Header session={session} />
+
+      <div className="fixed top-28 right-4 z-50 space-y-6 max-w-md">
+        {notifications.map((notification) => (
+          <div
+            key={notification.id}
+            className={`p-4 rounded-lg border backdrop-blur-sm transition-all duration-300 ${getNotificationStyles(
+              notification.type,
+            )}`}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1">
+                <p className="font-semibold text-sm text-white">{notification.title}</p>
+                <p className="text-xs opacity-90 mt-1 text-white">{notification.message}</p>
+              </div>
+              <button
+                onClick={() => removeNotification(notification.id)}
+                className="mt-1 hover:opacity-70 transition"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <main className="bg-[#1a1a1a] mx-auto w-full flex flex-col mt-18 lg:flex-row">
+        <section className="flex-1">
+          <div className="flex flex-wrap items-center justify-between p-4 border border-gray-600 shadow-sm bg-[#161928]">
+            <div className="flex items-center gap-2 cursor-pointer" onClick={() => setOpen(true)}>
+              <Image alt="btc" width={24} height={24} src="/svg/bitcoin.svg" />
+              <span className="font-semibold">{selectedCoin} (Bitcoin) / USDT</span>
+              <span className="ml-2 text-gray-400">▼</span>
+            </div>
+
+            <div className="flex gap-4 text-xs">
+              <div className="flex flex-col">
+                <div>
+                  24h Change:{' '}
+                  <span className={currentCoin?.change24h! < 0 ? 'text-red-500' : 'text-green-500'}>
+                    {currentCoin?.change24h! > 0 ? '+' : ''}
+                    {currentCoin?.change24h?.toFixed(2)}%
+                  </span>
+                </div>
+                <div className={isNegativeChange ? 'text-red-500' : 'text-green-500'}>
+                  ${(((currentCoin?.price || 0) * (currentCoin?.change24h || 0)) / 100).toFixed(2)}
+                </div>
+              </div>
+
+              <div className="flex flex-col">
+                <div>24h High:</div>
+                <div className="text-green-500 font-semibold">${currentCoin?.high24h}</div>
+              </div>
+
+              <div className="flex flex-col">
+                <div>24h Low:</div>
+                <div className="text-red-500 font-semibold">${currentCoin?.low24h}</div>
+              </div>
+            </div>
+
+            <div className="flex gap-2 text-base items-center">
+              <div className="flex flex-col">
+                <div className="text-gray-300 font-semibold">Current Price:</div>
+                <div className="text-[#50D2C1] font-semibold">
+                  ${currentCoin?.price.toFixed(2)}
+                </div>
+              </div>
+
+              <div className="text-gray-300 flex flex-col">
+                <div>
+                  TIME: <span className="font-semibold">{utcTime}</span>
+                </div>
+                <div className="font-semibold">(UTC)</div>
+              </div>
+            </div>
+          </div>
+
+          {open && (
+            <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+              <div className="bg-[#1b1f2e] p-4 rounded-lg w-[90%] max-w-3xl shadow-xl border border-gray-700">
+                <div className="flex justify-between items-center border-b border-gray-700 pb-2 mb-3">
+                  <h2 className="text-lg font-semibold text-white">Select Coin</h2>
+                  <button
+                    onClick={() => setOpen(false)}
+                    className="text-gray-400 hover:text-white text-xl"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div className="overflow-y-auto max-h-[400px]">
+                  <table className="w-full text-sm">
+                    <thead className="text-gray-400 border-b border-gray-700">
+                      <tr>
+                        <th className="text-left pb-2">Symbol</th>
+                        <th className="text-right pb-2">Price</th>
+                        <th className="text-right pb-2">24H Change</th>
+                      </tr>
+                    </thead>
+
+                    <tbody className="text-white">
+                      {Object.entries(coinPrices).map(([symbol, data]) => (
+                        <tr
+                          key={symbol}
+                          className="border-b border-gray-800 hover:bg-[#222638] cursor-pointer"
+                          onClick={() => {
+                            setSelectedCoin(symbol);
+                            setOpen(false);
+                          }}
+                        >
+                          <td className="py-3 font-semibold">{data.symbol}</td>
+                          <td className="text-right">${data.price.toFixed(2)}</td>
+                          <td
+                            className={`text-right ${
+                              data.change24h < 0 ? 'text-red-500' : 'text-green-500'
+                            }`}
+                          >
+                            {data.change24h > 0 ? '+' : ''}
+                            {data.change24h.toFixed(2)}%
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="border border-[#242424] rounded-xl relative">
+            <div>
+              <TradingViewChart />
+            </div>
+          </div>
+
+          <div className="rounded-xl p-4 mt-5 shadow-lg w-full">
+            <div className="flex gap-1 border-b border-[#2c2c2c] pb-2 mb-4 text-sm w-full">
+              {['Positions', 'Open Orders', 'Closed Positions', 'Realised PnL'].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTableTab(tab)}
+                  className={`flex-1 p-4 rounded-t-lg font-medium transition-all duration-200 ${
+                    activeTableTab === tab
+                      ? 'bg-[#fbc02d] text-black'
+                      : 'bg-[#0d1117] text-gray-300 hover:bg-[#16202d]'
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+
+            {pendingOrders.length > 0 && (
+              <div className="mb-4 p-3 bg-yellow-600/10 border border-yellow-600/40 rounded text-[#50D2C1] text-sm">
+                <div className="font-semibold mb-2">{pendingOrders.length} Pending Order(s)</div>
+                {pendingOrders.map((order) => (
+                  <div key={order.id} className="flex justify-between mt-2 text-yellow-300 text-xs">
+                    <span>
+                      {order.type} {order.amount.toFixed(4)} {order.symbol.split('/')[0]} @ $
+                      {(order.filledPrice || 0).toFixed(2)}
+                    </span>
+                    <button
+                      onClick={() => cancelPendingOrder(order.id)}
+                      className="text-red-400 hover:text-red-300"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="overflow-x-auto rounded-lg border border-[#2c2c2c]">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-[#1b1b1b] text-[#ffc107] border-b border-[#2c2c2c]">
+                    {[
+                      'Symbol',
+                      'Amount',
+                      'Leverage',
+                      'Entry Price',
+                      'Loss Cut',
+                      'Stop Loss',
+                      'Limit Order',
+                      'Market Order',
+                      'PnL (%)',
+                    ].map((th) => (
+                      <th key={th} className="py-3 px-3 font-semibold text-left">
+                        {th}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#222] text-gray-300">{renderTableRows()}</tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <div className="w-full lg:w-[380px] p-4">
+          <div className="bg-[#1f1f1f] p-4 rounded-xl border border-[#242424] shadow-sm">
+            <div className="flex gap-1 mb-4">
+              {['BTC', 'ETH', 'USDT'].map((coin) => (
+                <button
+                  key={coin}
+                  onClick={() => {
+                    setSelectedCoin(coin);
+                    setAmount(0);
+                    setPrice('');
+                  }}
+                  className={`flex-1 py-2 rounded-lg border transition ${
+                    selectedCoin === coin
+                      ? 'text-black bg-[#fbc02d] border-[#fbc02d]'
+                      : 'bg-[#131722] border-gray-600 text-gray-300 hover:border-gray-500'
+                  }`}
+                >
+                  {coin}
+                </button>
+              ))}
+            </div>
+
+            <div className="mb-4 p-3 bg-[#242424] rounded-lg">
+              <div className="text-sm text-gray-200 space-y-1">
+                <p>
+                  Balance:{' '}
+                  <span className="font-semibold text-[#50D2C1]">
+                    {balances[selectedCoin]?.toFixed(selectedCoin === 'USDT' ? 2 : 4) || '0.00'}
+                  </span>{' '}
+                  {selectedCoin}
+                </p>
+                <p>
+                  Available:{' '}
+                  <span className="font-semibold text-green-400">
+                    {(balances[selectedCoin] * 0.95)?.toFixed(selectedCoin === 'USDT' ? 2 : 4) ||
+                      '0.00'}
+                  </span>{' '}
+                  {selectedCoin}
+                </p>
+                <p className="text-xs text-gray-400">Price: ${currentCoin?.price.toFixed(2)}</p>
+              </div>
+            </div>
+
+            <form className="space-y-3" onSubmit={(e) => e.preventDefault()}>
+              <div className="flex gap-2">
+                {['Limit', 'Market'].map((label) => (
+                  <button
+                    key={label}
+                    type="button"
+                    onClick={() => setOrderType(label as 'Limit' | 'Market')}
+                    className={`flex-1 py-2 rounded transition font-medium ${
+                      orderType === label
+                        ? 'bg-[#fbc02d] text-black'
+                        : 'bg-[#242424] text-gray-300 hover:bg-[#2a2a2a]'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Amount Input */}
+              <div>
+                <label className="text-xs text-gray-400 block mb-1">Amount ({selectedCoin})</label>
+                <div className="relative flex gap-1">
+                  <input
+                    type="number"
+                    placeholder="0.00"
+                    value={amount || ''}
+                    onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
+                    step="0.0001"
+                    className="flex-1 bg-[#2b2d40] text-white px-3 py-2 rounded outline-none focus:ring-2 focus:ring-[#50D2C1]"
+                  />
+                  <div className="flex flex-col gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setAmount((prev) => parseFloat((prev + 0.1).toFixed(4)))}
+                      className="bg-[#2b2d40] hover:bg-[#333d50] text-gray-300 px-2 rounded"
+                    >
+                      <ChevronUp size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setAmount((prev) => Math.max(parseFloat((prev - 0.1).toFixed(4)), 0))
+                      }
+                      className="bg-[#2b2d40] hover:bg-[#333d50] text-gray-300 px-2 rounded"
+                    >
+                      <ChevronDown size={14} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Slider */}
+              <div>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={(amount / (balances[selectedCoin] || 1000)) * 100}
+                  onChange={(e) => handleSlider(e.target.value)}
+                  className="w-full accent-[#50D2C1]"
+                />
+                <div className="flex justify-between text-xs text-gray-500 mt-1">
+                  {['0%', '25%', '50%', '75%', '100%'].map((v) => (
+                    <span key={v}>{v}</span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Price Input for Limit Orders */}
+              {orderType === 'Limit' && (
+                <div>
+                  <label className="text-xs text-gray-400 block mb-1">Limit Price (USDT)</label>
+                  <div className="relative flex gap-1">
+                    <input
+                      type="number"
+                      placeholder={`${currentCoin?.price.toFixed(2)}`}
+                      value={price || ''}
+                      onChange={(e) => setPrice(e.target.value)}
+                      step="0.01"
+                      className="flex-1 bg-[#2b2d40] text-white px-3 py-2 rounded outline-none focus:ring-2 focus:ring-[#50D2C1]"
+                    />
+                    <div className="flex flex-col gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setPrice((prev) => (Number(prev) || 0) + 10)}
+                        className="bg-[#2b2d40] hover:bg-[#333d50] text-gray-300 px-2 rounded"
+                      >
+                        <ChevronUp size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPrice((prev) => Math.max((Number(prev) || 0) - 10, 0))}
+                        className="bg-[#2b2d40] hover:bg-[#333d50] text-gray-300 px-2 rounded"
+                      >
+                        <ChevronDown size={14} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Stop Loss */}
+              <div>
+                <label className="text-xs text-gray-400 block mb-1">Stop Loss (USDT)</label>
+                <div className="relative flex gap-1">
+                  <input
+                    type="number"
+                    placeholder="0.00"
+                    value={stopLoss || ''}
+                    onChange={(e) => setStopLoss(e.target.value)}
+                    step="0.01"
+                    className="flex-1 bg-[#2b2d40] text-white px-3 py-2 rounded outline-none focus:ring-2 focus:ring-red-400"
+                  />
+                  <div className="flex flex-col gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setStopLoss((prev) => (Number(prev) || 0) + 100)}
+                      className="bg-[#2b2d40] hover:bg-[#333d50] text-gray-300 px-2 rounded"
+                    >
+                      <ChevronUp size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setStopLoss((prev) => Math.max((Number(prev) || 0) - 100, 0))}
+                      className="bg-[#2b2d40] hover:bg-[#333d50] text-gray-300 px-2 rounded"
+                    >
+                      <ChevronDown size={14} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Leverage */}
+              <div>
+                <label className="text-xs text-gray-400 block mb-1">Leverage ({leverage}x)</label>
+                <input
+                  type="range"
+                  min="1"
+                  max="100"
+                  value={leverage}
+                  onChange={(e) => setLeverage(Number(e.target.value))}
+                  className="w-full accent-[#fbc02d]"
+                />
+                <div className="flex justify-between text-xs text-gray-500 mt-1">
+                  {['1x', '10x', '25x', '50x', '100x'].map((v) => (
+                    <span key={v}>{v}</span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Order Buttons */}
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => handleOrderSubmit('BUY')}
+                  className="flex-1 bg-green-600/80 hover:bg-green-700 py-3 rounded font-semibold transition"
+                >
+                  BUY<span className="block text-xs">(Long)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOrderSubmit('SELL')}
+                  className="flex-1 bg-red-600/80 hover:bg-red-700 py-3 rounded font-semibold transition"
+                >
+                  SELL<span className="block text-xs">(Short)</span>
+                </button>
+              </div>
+
+              {/* Auto-Sell */}
+              <div className="mt-4">
+                <label className="text-sm font-semibold text-gray-200 block mb-2">
+                  Auto-Sell at Profit:
+                </label>
+                <div className="grid grid-cols-4 gap-2">
+                  {['OFF', '100%', '200%', '300%'].map((label) => (
+                    <button
+                      key={label}
+                      type="button"
+                      onClick={() => setAutoSell(label)}
+                      className={`py-2 rounded text-sm transition ${
+                        autoSell === label
+                          ? 'bg-orange-500 text-white font-semibold'
+                          : 'bg-[#242424] text-gray-300 hover:bg-[#2a2a2a]'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowCalculator(true)}
+                className="w-full bg-orange-500 hover:bg-orange-600 py-2 rounded font-semibold transition text-sm"
+              >
+                📊 Position Calculator
+              </button>
+            </form>
+          </div>
+
+          {/* Pricing Sources */}
+          <div className="bg-[#1f1f1f] p-4 rounded-xl border border-[#242424] mt-4">
+            <h4 className="text-sm mb-3 font-semibold text-[#50D2C1]">Market Sources</h4>
+            <ul className="space-y-2 text-sm text-gray-300">
+              {[
+                ['Binance', (currentCoin?.price || 0) - 1],
+                ['Coinbase', (currentCoin?.price || 0) + 0.5],
+                ['Bybit', currentCoin?.price],
+                ['HTX', (currentCoin?.price || 0) - 0.3],
+                ['Kraken', (currentCoin?.price || 0) + 1.2],
+              ].map(([name, price]) => (
+                <li key={name} className="flex justify-between hover:text-blue-400 transition">
+                  <span>{name}</span>
+                  <span className="font-mono">${(price as number).toFixed(2)}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </main>
+
+      <Footer />
+    </div>
+  );
+};
+
+export default Chart;

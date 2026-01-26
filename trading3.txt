@@ -1,0 +1,35 @@
+1. Frontend sends `POST /api/orders` with order payload (userId, symbol, side, orderType, amount, price, leverage, stopLoss, takeProfit).
+2. Backend authenticates request and validates inputs (amount > min, leverage allowed, price positive, user owns funds).
+3. Backend checks user available balance; reject if insufficient.
+4. Create `Order` record in DB with status `PENDING` (store all fields and timestamps).
+5. If `orderType === MARKET`, mark order as claimed (e.g., `FILLING`) and immediately call `processMarketOrder(orderId)`.
+6. `processMarketOrder`: fetch current market price from price feed.
+7. Start DB transaction/session.
+8. Atomically re-check and lock user margin: decrement `balances.available` by `amount` and increment `balances.locked` by `amount` (use `$gte` guard).
+9. Calculate `quantity = (amount * leverage) / entryPrice`.
+10. Compute fee: `fee = amount * FEE_RATE` and deduct it (from available or locked as design).
+11. Create `Position` record (userId, symbol, side, entryPrice, quantity, margin, leverage, liquidationPrice, stopLoss, takeProfit, status=OPEN).
+12. Create `Trade`/execution record linking orderId and positionId (fillPrice, fillAmount, fee, timestamp).
+13. Update `Order` status to `FILLED` and set `filledAt`.
+14. Commit transaction; on error roll back and set order status to `REJECTED` (log reason).
+15. Emit WebSocket/event to frontend with order and position update.
+16. If `orderType === LIMIT`, keep order `PENDING` and add it to pending orderbook (DB). Claim the order atomically when filling (findOneAndUpdate `status: PENDING -> FILLING`).
+17. Price feed (WebSocket) supplies ticks; on each tick call `processPendingLimitOrdersForSymbol(symbol, tickPrice)` or let a worker poll pending orders.
+18. When a pending limit order meets trigger, call the same fill flow (steps 6–15) using either the trigger price or current tick price per your rules.
+19. Background worker runs on each price update (or at regular intervals): fetch OPEN positions, compute unrealised PnL for each (`pnl = (currentPrice - entryPrice) * quantity` for LONG; inverse for SHORT).
+20. Update position records with latest unrealised PnL and optionally stream updates to users.
+21. Liquidation check: if `currentPrice` crosses position liquidationPrice or `pnlPercent` <= liquidation threshold then atomically liquidate: close position, record trade, set status `LIQUIDATED`, and apply margin loss rules.
+22. Stop-loss / take-profit / auto-sell check: if rules met then call `closePosition(positionId, currentPrice)` to settle.
+23. `closePosition` (transactional): compute final PnL, release locked margin, update `balances.available += margin + pnl - fee`, create closing `Trade` record, set position `status=CLOSED` and `closedAt`.
+24. Ensure all balance updates use DB transactions or atomic conditional updates (prevent overspend/race).
+25. Concurrency safety: claim orders with `findOneAndUpdate` before processing; use Redis locks or job queue (BullMQ) if multi-worker; always guard balance changes with `$gte` checks in the same transaction.
+26. Persist every state change in `Trades`/`History` for audit and reconciliation (order created, claimed, filled, position opened, PnL updates, closed/liquidated).
+27. Add monitoring & logging for workers, price feed health, and error alerts (timeouts, failed transactions, high latency).
+28. Write unit tests for calculations (quantity, PnL, liquidation), integration tests for order flow, and concurrency tests simulating simultaneous fills.
+29. Add rate-limiting, input sanitization, and authorization checks (userId vs auth token).
+30. Deploy worker processes (price feed, limit watcher, PnL/liquidation worker) separately from API servers; ensure resilient reconnection and idempotency on restart.
+31. Add reconciliation job: periodically reconcile DB state vs expected balances and trade history; alert on mismatches.
+32. Provide frontend WebSocket subscription endpoints for live order/position updates and final confirmations.
+33. Post-deploy: run canary/simulated trades in staging with mocked price feed before enabling real-money trading.
+
+That's the linear, minimal sequence you follow from order submission to final settlement and monitoring.

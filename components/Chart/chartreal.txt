@@ -1,0 +1,449 @@
+'use client';
+
+import { useState } from 'react';
+import Image from 'next/image';
+import Header from '../shared/header';
+import Footer from '../shared/footer';
+import { ArrowDown, ArrowUp, Star } from 'lucide-react';
+import TradingViewChart from './TradingViewChart';
+
+const Chart = ({ session }: { session: any }) => {
+  const [activeTableTab, setActiveTableTab] = useState('Positions');
+  const [selectedCoin, setSelectedCoin] = useState('USDT');
+  const [orderType, setOrderType] = useState<'Limit' | 'Market'>('Limit');
+  const [amount, setAmount] = useState(0);
+  const [showCalculator, setShowCalculator] = useState(false);
+
+  const [autoSell, setAutoSell] = useState('OFF');
+  const [mockOrders, setMockOrders] = useState<any[]>([]);
+
+  const handleOrderSubmit = (type: 'BUY' | 'SELL') => {
+    if (!amount || amount <= 0) return alert('Please enter a valid amount');
+
+    const order = {
+      id: Date.now(),
+      symbol: `${selectedCoin}/USDT`,
+      amount,
+      type,
+      orderType,
+      price:
+        orderType === 'Limit' ? (Math.random() * (110000 - 100000) + 100000).toFixed(2) : 'Market',
+      pnl: `${(Math.random() * 5 - 2).toFixed(2)}%`,
+      autoSell,
+    };
+
+    setMockOrders((prev) => [order, ...prev]);
+    setAmount(0);
+    alert(`${type} ${orderType} order placed for ${amount} ${selectedCoin}`);
+  };
+
+  const increaseAmount = () => setAmount((prev) => prev + 10);
+  const decreaseAmount = () => setAmount((prev) => (prev - 10 >= 0 ? prev - 10 : 0));
+
+  const handleSlider = (value: string) => {
+    const percent = parseInt(value, 10);
+    setAmount((percent / 100) * 1000); // mock: 1000 USDT balance
+  };
+
+  const renderTableRows = () => {
+    if (mockOrders.length === 0)
+      return (
+        <tr>
+          <td colSpan={11} className="text-center py-6 text-gray-500">
+            No {activeTableTab.toLowerCase()} yet
+          </td>
+        </tr>
+      );
+
+    return mockOrders.map((order) => (
+      <tr key={order.id} className="border-b border-[#242424] hover:bg-[#2a2a2a]">
+        <td className="px-2 py-2">{order.symbol}</td>
+        <td className="px-2 py-2">{order.amount.toFixed(2)}</td>
+        <td className="px-2 py-2">10x</td>
+        <td className="px-2 py-2">{order.price}</td>
+        <td className="px-2 py-2">105,000</td>
+        <td className="px-2 py-2">104,000</td>
+        <td className="px-2 py-2">
+          <button className="text-[#50D2C1] hover:underline text-xs">Limit</button>
+        </td>
+        <td className="px-2 py-2">
+          <button className="text-red-400 hover:underline text-xs">Market</button>
+        </td>
+        <td
+          className={`px-2 py-2 font-semibold ${
+            order.pnl.includes('-') ? 'text-red-500' : 'text-green-500'
+          }`}
+        >
+          {order.pnl}
+        </td>
+      </tr>
+    ));
+  };
+
+  return (
+    <div className="text-white bg-[#1a1a1a] min-h-screen">
+      <Header session={session} />
+
+      <main className="bg-[#1a1a1a] mx-auto py-8 grid grid-cols-1 lg:grid-cols-3 gap-6 px-3 lg:px-6">
+        <section className="lg:col-span-2 space-y-6">
+          <div className="flex flex-wrap items-center justify-between bg-[#1f1f1f] p-4 rounded-xl border border-[#242424] shadow-sm">
+            <div className="flex items-center gap-2">
+              <Image alt="btc" width={24} height={24} src="/svg/bitcoin.svg" />
+              <span className="font-semibold">Bitcoin (BTC) / USDT</span>
+              <span className="ml-2 text-gray-400">▼</span>
+            </div>
+            <div className="flex gap-4 text-sm">
+              <span>
+                24h Change:
+                <span className="text-red-500 font-semibold"> 2,280 (2.11%)</span>
+              </span>
+              <span>
+                24h High:
+                <span className="text-green-500 font-semibold"> 111,290</span>
+              </span>
+              <span>
+                24h Low:
+                <span className="text-red-500 font-semibold"> 106,710</span>
+              </span>
+            </div>
+          </div>
+
+          {/* Chart Area */}
+          <div className="border border-[#242424] rounded-xl bg-[#1f1f1f] p-4 relative">
+            <div className="absolute top-4 right-4 opacity-20">
+              <Image
+                src="/images/FYBIT_white_horizontal.png"
+                alt="logo watermark"
+                width={120}
+                height={40}
+              />
+            </div>
+
+            <div className="h-[400px] relative">
+              <TradingViewChart />
+            </div>
+          </div>
+
+          {/* Positions / Orders Table */}
+          <div className="bg-[#1f1f1f] border border-[#242424] rounded-xl p-4">
+            <div className="flex gap-3 border-b border-[#242424] pb-2 mb-4 text-sm">
+              {['Positions', 'Open Orders', 'Closed Positions', 'Realised PnL'].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTableTab(tab)}
+                  className={`px-3 py-1 rounded transition ${
+                    activeTableTab === tab
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-[#242424] hover:bg-blue-600/20'
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-gray-300 border-b border-[#242424]">
+                  {[
+                    'Symbol',
+                    'Amount',
+                    'Leverage',
+                    'Price',
+                    'Loss Cut',
+                    'Stop Loss Price',
+                    'Sell (Limit)',
+                    'Sell (Market)',
+                    'Unrealised PnL (%)',
+                  ].map((th) => (
+                    <th key={th} className="py-2 text-left px-2 font-medium">
+                      {th}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>{renderTableRows()}</tbody>
+            </table>
+          </div>
+        </section>
+
+        {/* --- RIGHT: ORDER PANEL --- */}
+        <aside className="space-y-6">
+          <div className="bg-[#1f1f1f] p-4 rounded-xl border border-[#242424] shadow-sm">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-300">
+                {session?.user?.email || 'demo@fybit.io'}
+              </span>
+              <div className="flex gap-1 text-[#50D2C1]">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} size={14} fill="currentColor" />
+                ))}
+              </div>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex gap-2 mt-3">
+              {['BTC', 'ETH', 'USDT'].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setSelectedCoin(tab)}
+                  className={`flex-1 py-2 rounded transition ${
+                    selectedCoin === tab
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-[#242424] hover:bg-blue-600/20'
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+
+            {/* Form */}
+            <form className="mt-6 space-y-4" onSubmit={(e) => e.preventDefault()}>
+              <div className="text-sm text-gray-400">
+                <p>Balance: 1000.00000 {selectedCoin}</p>
+                <p>Available: 950.00000 {selectedCoin}</p>
+              </div>
+
+              <div className="flex justify-between text-xs text-gray-500">
+                <span>Min: 5.00 {selectedCoin}</span>
+                <span>Max: 150,000.00 {selectedCoin}</span>
+              </div>
+
+              {/* Order Type */}
+              <div className="flex gap-2">
+                {['Limit', 'Market'].map((label) => (
+                  <button
+                    key={label}
+                    type="button"
+                    onClick={() => setOrderType(label as 'Limit' | 'Market')}
+                    className={`flex-1 py-2 rounded transition ${
+                      orderType === label
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-[#242424] hover:bg-blue-600/20'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Amount Input */}
+              <div className="flex items-center bg-[#242424] rounded overflow-hidden">
+                <input
+                  type="number"
+                  placeholder="Enter amount"
+                  value={amount || ''}
+                  onChange={(e) => setAmount(Number(e.target.value))}
+                  className="flex-1 bg-transparent px-3 py-2 text-white outline-none"
+                />
+                <div className="flex flex-col border-l border-[#1f1f1f]">
+                  <button type="button" onClick={increaseAmount} className="p-1 hover:bg-[#1f1f1f]">
+                    <ArrowUp size={16} />
+                  </button>
+                  <button type="button" onClick={decreaseAmount} className="p-1 hover:bg-[#1f1f1f]">
+                    <ArrowDown size={16} />
+                  </button>
+                </div>
+                <span className="px-3 text-gray-400 text-sm">{selectedCoin}</span>
+              </div>
+
+              {/* Slider */}
+              <input
+                type="range"
+                className="w-full accent-blue-600"
+                value={(amount / 1000) * 100}
+                onChange={(e) => handleSlider(e.target.value)}
+              />
+              <div className="flex justify-between text-xs text-gray-500">
+                {['0%', '25%', '50%', '75%', '100%'].map((v) => (
+                  <span key={v}>{v}</span>
+                ))}
+              </div>
+              {/* Price / Stop Loss / Leverage Fields */}
+              <div className="space-y-3">
+                {/* Price */}
+                <div className="flex items-center justify-between bg-[#242424] rounded px-3 py-2">
+                  <label className="text-sm text-gray-300 w-24">Price</label>
+                  <input
+                    type="number"
+                    placeholder="Enter price"
+                    className="flex-1 bg-transparent text-right text-white outline-none"
+                  />
+                  <span className="text-gray-400 text-sm ml-2">USDT</span>
+                </div>
+
+                {/* Stop Loss */}
+                <div className="flex items-center justify-between bg-[#242424] rounded px-3 py-2">
+                  <label className="text-sm text-gray-300 w-24">Stop Loss</label>
+                  <input
+                    type="number"
+                    placeholder="Enter stop loss"
+                    className="flex-1 bg-transparent text-right text-white outline-none"
+                  />
+                  <span className="text-gray-400 text-sm ml-2">USDT</span>
+                </div>
+
+                {/* Leverage */}
+                <div>
+                  <div className="flex items-center justify-between bg-[#242424] rounded px-3 py-2">
+                    <label className="text-sm text-gray-300 w-24">Leverage</label>
+                    <input
+                      type="number"
+                      defaultValue={100}
+                      className="flex-1 bg-transparent text-right text-white outline-none"
+                    />
+                    <span className="text-gray-400 text-sm ml-2">X</span>
+                  </div>
+
+                  {/* Leverage Slider */}
+                  <input
+                    type="range"
+                    min={1}
+                    max={100}
+                    defaultValue={100}
+                    className="w-full accent-[#50D2C1] mt-2"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500 mt-1">
+                    {['1x', '5x', '10x', '25x', '50x', '75x', '100x'].map((v) => (
+                      <span key={v}>{v}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Buy / Sell Buttons */}
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleOrderSubmit('BUY')}
+                  className="flex-1 bg-green-600 py-3 rounded hover:bg-green-700"
+                >
+                  Buy Order <span className="font-semibold block">UP</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOrderSubmit('SELL')}
+                  className="flex-1 bg-red-600 py-3 rounded hover:bg-red-700"
+                >
+                  Sell Order <span className="font-semibold block">DOWN</span>
+                </button>
+              </div>
+
+              {/* Auto Sell */}
+              <div>
+                <h3 className="text-sm mb-2">Auto-Sell Setting:</h3>
+                <div className="flex gap-2">
+                  {['OFF', '100%', '200%', '300%'].map((label) => (
+                    <button
+                      key={label}
+                      type="button"
+                      onClick={() => setAutoSell(label)}
+                      className={`flex-1 py-2 rounded transition ${
+                        autoSell === label
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-[#242424] hover:bg-blue-600/20'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                {/* Calculator Button */}
+                <button
+                  type="button"
+                  onClick={() => setShowCalculator(true)}
+                  className="w-full bg-orange-500 hover:bg-orange-600 py-2 mt-3 rounded font-semibold"
+                >
+                  Calculator
+                </button>
+                {showCalculator && (
+                  <div className="fixed inset-0 flex items-center justify-center bg-black/70 z-50">
+                    <div className="relative bg-[#1f1f1f] border border-[#2a2a2a] rounded-xl w-[650px] shadow-2xl overflow-hidden max-h-[80vh]">
+                      {/* Close Button */}
+                      <button
+                        className="absolute top-2.5 right-3 text-gray-400 hover:text-white text-sm"
+                        onClick={() => setShowCalculator(false)}
+                      >
+                        ✕
+                      </button>
+
+                      {/* Tabs */}
+                      <div className="flex border-b border-[#2a2a2a]">
+                        <button className="flex-1 py-2 bg-[#50D2C1] text-black font-semibold text-sm">
+                          Position Calculator
+                        </button>
+                        <button className="flex-1 py-2 bg-[#242424] text-gray-300 text-sm hover:bg-[#50D2C1]/20">
+                          PNL Calculator
+                        </button>
+                      </div>
+
+                      <div className="flex">
+                        <div className="flex-1 p-4 border-r border-[#2a2a2a]">
+                          {/* Position Up / Down */}
+                          <div className="flex mb-3">
+                            <button className="flex-1 py-1.5 bg-[#50D2C1] text-black font-semibold rounded-l text-sm">
+                              Position UP
+                            </button>
+                            <button className="flex-1 py-1.5 bg-[#242424] text-gray-300 rounded-r text-sm hover:bg-[#50D2C1]/20">
+                              Position DOWN
+                            </button>
+                          </div>
+
+                          {/* Table Headers */}
+                          <div className="grid grid-cols-3 gap-x-2 text-[#50D2C1] text-sm mb-1">
+                            <span>Price</span>
+                            <span>Amount</span>
+                            <span>Leverage</span>
+                          </div>
+
+                          {/* Calculate Button */}
+                          <button className="w-full mt-3 border border-[#50D2C1] text-[#50D2C1] py-1.5 rounded hover:bg-[#50D2C1] hover:text-black font-semibold text-sm transition">
+                            Calculate
+                          </button>
+                        </div>
+
+                        {/* RIGHT SIDE SUMMARY */}
+                        <div className="w-[220px] p-4 text-[#50D2C1] text-sm leading-6">
+                          <p>Amount:</p>
+                          <p>Price:</p>
+                          <p>Leverage:</p>
+                          <p>Loss Cut:</p>
+                          <p>Fee:</p>
+                          <p>Fee %:</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </form>
+          </div>
+
+          {/* Pricing Section */}
+          <div className="bg-[#1f1f1f] p-4 rounded-xl border border-[#242424]">
+            <h4 className="text-sm mb-3 font-medium">Pricing Sources</h4>
+            <ul className="space-y-1 text-sm text-gray-300">
+              {[
+                ['Bitfinex', '110,110'],
+                ['HTX', '109,985'],
+                ['Binance', '109,980'],
+                ['Coinbase', '110,045'],
+                ['Bybit', '109,995'],
+              ].map(([name, price]) => (
+                <li key={name} className="flex justify-between hover:text-blue-400 transition">
+                  <span>{name}</span>
+                  <span>{price}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </aside>
+      </main>
+
+      <Footer />
+    </div>
+  );
+};
+
+export default Chart;

@@ -1,0 +1,336 @@
+Nice — here’s a focused, step-by-step implementation plan you can follow to turn your UI mock into a **real trading engine**. I’ll include database models, API shape, core functions (with runnable-style snippets you can drop into a Node/Next backend), background worker patterns, concurrency/consistency notes, and testing tips.
+
+I’ll assume Node + Express / Next.js API routes, MongoDB (Mongoose), and a price feed (WebSocket). Use Redis for locks/queues if you want production-safety.
+
+---
+
+# 1) High-level flow (one sentence each)
+
+1. Frontend `POST /api/orders` → backend validates and writes an **Order** to DB.
+2. If **market order**: immediately **lock margin** and try to fill using current price (execute).
+3. If **limit order**: save as `PENDING` and the price watcher fills when market meets trigger.
+4. When order fills → create/adjust a **Position**, deduct fees, update balances (atomic), emit events/WS to client.
+5. Background worker continuously updates PnL, checks liquidations and auto-sell rules, and closes positions when needed.
+
+---
+
+# 2) Database models (Mongoose overview)
+
+`User` (important fields)
+
+```js
+const UserSchema = new mongoose.Schema({
+  email: String,
+  balances: { // denominated in USDT base
+    available: { type: Number, default: 0 }, // spendable
+    locked: { type: Number, default: 0 }     // margin locked
+  },
+  // other fields...
+});
+```
+
+`Order`
+
+```js
+const OrderSchema = new mongoose.Schema({
+  userId: mongoose.Types.ObjectId,
+  symbol: String,          // "BTC/USDT"
+  side: { type: String },  // "BUY" | "SELL"
+  orderType: { type: String }, // "MARKET" | "LIMIT"
+  amount: Number,          // margin in USDT
+  price: Number,           // limit price (null for market)
+  leverage: Number,
+  status: { type: String, default: 'PENDING' }, // PENDING, FILLED, CANCELLED, REJECTED
+  createdAt: Date,
+  filledAt: Date,
+});
+```
+
+`Position`
+
+```js
+const PositionSchema = new mongoose.Schema({
+  userId: mongoose.Types.ObjectId,
+  symbol: String,
+  side: { type: String }, // LONG | SHORT
+  entryPrice: Number,
+  quantity: Number,      // base asset amount (e.g., BTC)
+  margin: Number,        // amount locked in USDT
+  leverage: Number,
+  liquidationPrice: Number,
+  stopLoss: Number,
+  takeProfit: Number,
+  status: { type: String, default: 'OPEN' }, // OPEN, CLOSED, LIQUIDATED
+  createdAt: Date,
+  closedAt: Date,
+});
+```
+
+`Trade` (execution history)
+
+```js
+const TradeSchema = new mongoose.Schema({
+  orderId: mongoose.Types.ObjectId,
+  positionId: mongoose.Types.ObjectId,
+  fillPrice: Number,
+  fillAmount: Number, // margin or quantity depending
+  fee: Number,
+  timestamp: Date
+});
+```
+
+---
+
+# 3) Important formulas (copy these into your code)
+
+* `quantity = (margin * leverage) / entryPrice`
+* `pnl = (currentPrice - entryPrice) * quantity` for LONG
+* `pnl = (entryPrice - currentPrice) * quantity` for SHORT
+* `pnlPercent = (pnl / margin) * 100`
+* simplified `liquidationPrice` for LONG: `liq = entryPrice - (entryPrice / leverage)` (use full-bybit formula later)
+
+Fees example:
+
+```js
+const FEE_RATE = 0.0004; // 0.04% -> tune as needed
+fee = margin * FEE_RATE;
+```
+
+---
+
+# 4) API: place order (endpoint skeleton)
+
+**POST /api/orders**
+
+```js
+// assume express style
+app.post('/api/orders', async (req, res) => {
+  const { userId, symbol, side, orderType, amount, price, leverage } = req.body;
+
+  // 1) Validate inputs: amount > min, leverage in allowed range, user has enough available balance
+  const user = await User.findById(userId);
+
+  if (!user || user.balances.available < amount) {
+    return res.status(400).json({ error: 'Insufficient balance' });
+  }
+
+  // 2) Create DB order (status PENDING)
+  const order = await Order.create({ userId, symbol, side, orderType, amount, price, leverage, createdAt: new Date() });
+
+  // 3) If market → process immediately (async)
+  if (orderType === 'MARKET') {
+    processMarketOrder(order._id).catch(err => console.error(err));
+  }
+
+  res.json({ orderId: order._id, status: order.status });
+});
+```
+
+---
+
+# 5) Core engine functions (pseudocode + implementation notes)
+
+## a) processMarketOrder(orderId)
+
+* Load order
+* Get `currentPrice` from price feed
+* Start DB transaction (Mongo session) to atomically:
+
+  * Lock margin: decrement `user.balances.available` by `amount`, increment `user.balances.locked` by `amount`
+  * Compute `quantity = (amount * leverage) / currentPrice`
+  * Create `position` with `entryPrice = currentPrice`, `quantity`, `margin = amount`, compute `liquidationPrice`
+  * Create `trade` record with fee
+  * Deduct fee from user.available (or from margin depending design)
+* Commit transaction
+* Mark order as FILLED, filledAt
+* Emit WS event to user
+
+Key: use `mongoose.startSession()` and `session.withTransaction()` to ensure atomicity.
+
+Example skeleton:
+
+```js
+async function processMarketOrder(orderId) {
+  const session = await mongoose.startSession();
+  try {
+    await session.withTransaction(async () => {
+      const order = await Order.findById(orderId).session(session);
+      const user = await User.findById(order.userId).session(session);
+
+      const price = await getCurrentPrice(order.symbol); // from price feed
+      const fee = order.amount * FEE_RATE;
+      const quantity = (order.amount * order.leverage) / price;
+
+      // Update balances atomically
+      await User.updateOne(
+        { _id: user._id, 'balances.available': { $gte: order.amount } },
+        {
+          $inc: {
+            'balances.available': -order.amount,
+            'balances.locked': order.amount,
+            'balances.available': -fee // deduct fee from available
+          }
+        }
+      ).session(session);
+
+      // create position
+      const pos = await Position.create([{
+        userId: user._id,
+        symbol: order.symbol,
+        side: order.side === 'BUY' ? 'LONG' : 'SHORT',
+        entryPrice: price,
+        quantity,
+        margin: order.amount,
+        leverage: order.leverage,
+        liquidationPrice: calcLiquidation(price, order.leverage, order.side),
+        status: 'OPEN',
+        createdAt: new Date()
+      }], { session });
+
+      // trade record
+      await Trade.create([{
+        orderId: order._id,
+        positionId: pos[0]._id,
+        fillPrice: price,
+        fillAmount: order.amount,
+        fee,
+        timestamp: new Date()
+      }], { session });
+
+      // update order status
+      await Order.updateOne({ _id: order._id }, { $set: { status: 'FILLED', filledAt: new Date() } }).session(session);
+    });
+  } finally {
+    session.endSession();
+  }
+}
+```
+
+**Note:** updateOne with a condition on available funds prevents race where two simultaneous market orders overspend the user.
+
+---
+
+## b) limit order watcher
+
+Two approaches:
+
+* **WebSocket price callback:** each new tick runs `processPendingLimitOrdersForSymbol(symbol, price)`. Efficient.
+* **Polling:** cron every 500–1000ms to check pending orders where triggerPrice meets condition.
+
+Simplest:
+
+```js
+async function processPendingLimitOrdersForSymbol(symbol, price) {
+  // find buy orders where price <= trigger (and sell where price >= trigger)
+  const buys = await Order.find({
+    symbol,
+    orderType: 'LIMIT',
+    status: 'PENDING',
+    side: 'BUY',
+    price: { $gte: price } // or appropriate <= / >= logic depending on stored price
+  }).limit(100);
+
+  for (const order of buys) {
+    // lock with per-order atomic check to avoid double-fills
+    await processMarketOrder(order._id); // reuse market flow (fill at currentPrice or order.price)
+  }
+}
+```
+
+Recommendation: when filling, use a DB update that sets `status: 'FILLING'` using `findOneAndUpdate({ _id, status: 'PENDING' }, { status: 'FILLING' })` to claim the order before processing.
+
+---
+
+## c) background PnL & liquidation checker
+
+Run every tick (or on price updates):
+
+* For each OPEN position, compute unrealised PnL at current price.
+* If `pnlPercent <= liquidationThreshold` or `currentPrice <= liqPrice` then liquidate: set position `status=LIQUIDATED`, release locked margin (but user usually loses margin), record trade.
+* If `pnlPercent >= autoSellThreshold` or SL/TP hit → call `closePosition(positionId, currentPrice)`.
+
+`closePosition` should be transactional:
+
+* calculate final PnL
+* release locked margin, update `user.balances.available += margin + pnl - fee`
+* set position closed, record trade
+
+Example PnL loop:
+
+```js
+for each open position {
+  const price = getCurrentPrice(position.symbol);
+  const pnl = calcPnl(position, price);
+  if (shouldClose(pnl, position)) {
+    await closePosition(position._id, price);
+  }
+}
+```
+
+---
+
+# 6) Concurrency & safety (critical)
+
+* Use MongoDB transactions (replica set required) for balance+position updates.
+* Use optimistic claiming for orders: `findOneAndUpdate({ _id, status: 'PENDING' }, { $set: { status: 'FILLING' }})` to avoid double processing.
+* For global critical sections (e.g., checking many orders), use Redis distributed lock (redlock) or queue workers (BullMQ) to serialize order fills.
+* Validate balances in the same transaction or update query with `$gte` condition to prevent overspend.
+
+---
+
+# 7) Price feed
+
+* Production: subscribe to exchange WebSocket (Binance / Bybit / Coinbase). Keep connection, parse ticks, convert to your symbol format.
+* Dev/test: use a simulated price emitter that random-walks price for unit tests.
+
+---
+
+# 8) Logging & observability
+
+* Every state change (order created, order claimed, position open/close, trade executed) should be logged to a `Trades`/`History` collection and to logging system (e.g., Winston).
+* Monitor worker liveness (Prometheus / simple health-check endpoint).
+
+---
+
+# 9) Tests to write (minimum)
+
+* Unit: `calcQuantity`, `calcPnl`, `calcLiquidation` edge cases.
+* Integration: place market order when user has exact balance → assert available reduced and locked increased, and position created.
+* Race condition test: two concurrent market orders that would overspend — assert only one succeeds.
+* Limit order fill flow: create pending order, then simulate tick that should fill, assert order becomes FILLED.
+
+---
+
+# 10) Example roadmap / tasks (ordered)
+
+1. Add Mongoose schemas + DB transaction helpers.
+2. Implement `POST /api/orders` and validation.
+3. Implement `processMarketOrder()` (complete with transaction).
+4. Wire real price feed (or mock). Test market order with feed.
+5. Implement limit order watcher (first polling, then migrate to WS).
+6. Implement PnL calculation loop + closePosition (stop-loss, auto-sell, liquidation).
+7. Add Redis lock or job queue to prevent double-processing.
+8. Add unit & integration tests.
+9. Hook up frontend to consume socket events for position/order updates.
+10. Security: rate-limit API, validate userId vs auth token.
+
+---
+
+# 11) Minimal extra: code snippets you can copy/paste
+
+I already included skeletons above (processMarketOrder, watcher), but if you want I’ll produce full working files (Mongoose models, API route, worker) in one shot tailored to your repo structure. Tell me if you want **Express** or **Next.js API route** style and whether you have a preferred queue (Redis/BullMQ) and I’ll generate the files.
+
+---
+
+# TL;DR — Minimal viable features to finish Milestone 6
+
+1. `POST /api/orders` validation + DB save
+2. Implement `processMarketOrder` with Mongo transaction (locks margin, create position, fee)
+3. Price feed + limit order watcher
+4. PnL & liquidation background worker
+5. Safe concurrency (order claim + transaction + optional Redis lock)
+6. Tests for race conditions and correctness
+
+---
+
+Want me to generate the **full code** for step 1–3 (models + `POST /api/orders` + `processMarketOrder` + a simple price feed mock) as files you can drop straight into your repo? If yes, say **“generate code (Next.js API)”** or **“generate code (Express)”** and I’ll produce it.

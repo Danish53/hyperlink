@@ -1,0 +1,329 @@
+ ===================
+  TRADING LOGIC 
+ ===================
+Alright bro, let me break this down **exactly the way a real trading engine works** — **both conceptually AND how you will implement it in your Next.js backend**.
+
+Your UI right now only *simulates* orders.
+
+But your milestone says:
+
+### **🚀 Milestone 6: Trading Engine Logic**
+
+You must now build the **actual buy/sell order engine**, meaning:
+
+* Accept orders from frontend
+* Match orders (market & limit)
+* Open/close positions
+* Update user balances
+* Apply leverage
+* Track PnL
+* Trigger stop-loss & auto-sell
+* Record history
+
+Let me break it down clearly, with formulas and the workflow.
+
+---
+
+# ✅ **HOW A REAL TRADING ENGINE WORKS (Simplified Futures/Perpetual Model)**
+
+### **There are 4 big components:**
+
+1. **Order Matching**
+2. **Position Management**
+3. **Balance & Margin Updates**
+4. **PnL Calculation & Closing Mechanics**
+
+Your UI already collects values → amount, price, leverage, type, stop-loss.
+
+Now you must implement backend logic that uses these values.
+
+---
+
+# ⭐ 1 — **ORDER MATCHING ENGINE**
+
+There are 2 order types:
+
+## **A. Market Order**
+
+User buys/sells **immediately** at current market price.
+
+Flow:
+
+```
+take currentPrice = getPrice(symbol)
+execute order immediately
+open position at currentPrice
+subtract fees from balance
+```
+
+## **B. Limit Order**
+
+User buys/sells **only when price hits their limit**.
+
+Flow:
+
+```
+if orderType === LIMIT:
+    save order in DB with status = 'PENDING'
+    engine checks price every second 
+    when currentPrice <= limitPrice (BUY)
+        fill order
+    when currentPrice >= limitPrice (SELL)
+        fill order
+```
+
+You create a cron job or websocket price feed to check pending orders.
+
+---
+
+# ⭐ 2 — **POSITION MANAGEMENT**
+
+When an order is filled, you create a **position**.
+
+A position includes:
+
+```ts
+{
+  userId,
+  symbol: "BTC/USDT",
+  side: "LONG" | "SHORT",
+  entryPrice,
+  leverage,
+  amount,             // USDT margin
+  quantity,           // how much BTC they control
+  liquidationPrice,
+  stopLoss,
+  takeProfit,
+  pnl,
+  status: "OPEN"
+}
+```
+
+### **🧮 Quantity = (amount * leverage) / entryPrice**
+
+Example:
+
+```
+amount = 100 USDT
+leverage = 10x
+price = 100,000 USDT
+```
+
+Quantity:
+
+```
+qty = (100 * 10) / 100,000 = 0.01 BTC
+```
+
+---
+
+# ⭐ 3 — **BALANCE & MARGIN LOGIC**
+
+When user opens a position:
+
+### **Required Margin = amount**
+
+You lock that amount from the user balance.
+
+Example:
+
+```
+User balance = 1000 USDT
+Amount = 100 USDT
+```
+
+After order:
+
+```
+availableBalance = 900 USDT
+marginBalance = 100 USDT
+```
+
+### **Fee deduction**
+
+For each execution:
+
+```
+fee = amount * 0.04%   // example fee
+balance -= fee
+```
+
+---
+
+# ⭐ 4 — **PnL (Profit & Loss) Calculation**
+
+You calculate PnL with live price updates.
+
+## **For LONG:**
+
+```
+PnL = (currentPrice - entryPrice) * quantity
+```
+
+## **For SHORT:**
+
+```
+PnL = (entryPrice - currentPrice) * quantity
+```
+
+### **PnL (%)**
+
+```
+pnlPercent = (PnL / margin) * 100
+```
+
+### **Liquidation Price**
+
+Simplified:
+
+```
+liqPrice = entryPrice - (entryPrice / leverage)   // LONG
+liqPrice = entryPrice + (entryPrice / leverage)   // SHORT
+```
+
+---
+
+# ⭐ 5 — **POSITION CLOSING**
+
+A position can close via:
+
+### **A. User clicks CLOSE**
+
+```
+get currentPrice
+calculate PnL
+balance = balance + margin + PnL
+status = CLOSED
+```
+
+### **B. Stop Loss triggers**
+
+If user sets a stop loss (e.g., -30% loss)
+
+```
+if pnlPercent <= stopLoss:
+    auto close position
+```
+
+### **C. Auto-Sell (100%, 200%, 300%)**
+
+Example: AutoSell 200% means:
+
+```
+if pnlPercent >= 200:
+    close position
+```
+
+### **D. Liquidation**
+
+If price hits liquidation price:
+
+```
+position closed
+user loses margin
+status = LIQUIDATED
+```
+
+---
+
+# ⭐ 6 — **Limit Order Logic (Important)**
+
+When limit order is created:
+
+```
+place order in DB:
+{
+  type: LIMIT,
+  triggerPrice: userPrice,
+  side: BUY/SELL,
+  status: 'PENDING'
+}
+```
+
+A price watcher runs every second:
+
+```
+if BUY and currentPrice <= userPrice:
+    fill order
+if SELL and currentPrice >= userPrice:
+    fill order
+```
+
+When filled → convert to a position.
+
+---
+
+# ⭐ 7 — **Market Order Logic**
+
+Market order skips checking:
+
+```
+price = currentMarketPrice
+execute immediately
+create position
+update balance
+```
+
+---
+
+# 📦 HOW YOU IMPLEMENT THIS (Backend Structure)
+
+### 🔥 1. **API endpoint for placing orders**
+
+`POST /api/orders`
+
+### 🔥 2. **Price WebSocket (Binance or your mock feed)**
+
+### 🔥 3. **Cron job / worker**
+
+* check limit orders
+* update PnL for positions
+* close liquidations
+* close auto-sell
+
+### 🔥 4. **Database models**
+
+`User`
+`Orders`
+`Positions`
+`Trades`
+`History`
+
+---
+
+# ⚡ Your frontend code DOES NOT do any of this yet
+
+Right now you only do:
+
+```ts
+setMockOrders()
+```
+
+This is just UI-level mock data.
+
+**The real engine lives in the backend**, not in this page.
+
+---
+
+# ⭐ FINAL — IF YOU WANT, I CAN BUILD THE WHOLE ENGINE FOR YOU
+
+I can:
+
+✔ write the backend API structure
+✔ write the DB schema for orders + positions
+✔ write the price monitoring engine
+✔ write the limit order matcher
+✔ write the liquidation + PnL engine
+✔ fully connect your frontend to a real trading engine
+
+Just tell me:
+
+👉 Do you want a **centralised CFD/futures engine** like Bybit
+or
+👉 a **simple spot trading simulation**?
+
+Answer this and I’ll build the full code base for you.
+
+
+
+

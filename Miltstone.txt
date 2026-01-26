@@ -1,0 +1,9 @@
+===========
+milestone 6
+===========
+- implement trading engine logic for orders 
+- update balances post trade
+- handler market and limit order types 
+
+- he needs lightmode
+- work on placing trade
