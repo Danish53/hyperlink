@@ -16,7 +16,8 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
+    /* --background: #0a0a0a; */
+    --background: #0F1A1F;
     --foreground: #ededed;
   }
 }
@@ -323,7 +324,8 @@ body.light-theme .search-bar input::placeholder {
 .l-blocks-list.--faqs {
   /* background: linear-gradient(180deg, #1e1e1e, #333); */
   color: #fff;
-  font-family: 'Arial', sans-serif;
+  font-family: var(--font-sans), system-ui, "Segoe UI", Roboto, Ubuntu,
+    "Helvetica Neue", sans-serif;
   margin: 0;
   padding: 20px 0;
   max-width: 600px;
@@ -510,7 +512,8 @@ body.light-theme .container1 {
 body.light-theme .l-blocks-list.--faqs {
   /* background: linear-gradient(180deg, #d6d6d6, #cfcdcd); */
   color: #000;
-  font-family: 'Arial', sans-serif;
+  font-family: var(--font-sans), system-ui, "Segoe UI", Roboto, Ubuntu,
+    "Helvetica Neue", sans-serif;
   margin: 0;
   /* padding: 20px 0; */
   max-width: 1200px;
@@ -803,7 +806,8 @@ body.light-theme .no-results {
 }
 
 body {
-  font-family: Arial, sans-serif;
+  font-family: var(--font-sans), system-ui, "Segoe UI", Roboto, Ubuntu,
+    "Helvetica Neue", sans-serif;
   color: #fff;
   background-color: #121212;
   margin: 0;
@@ -930,7 +934,8 @@ body.light-theme .fees-section h2 {
 }
 
 body {
-  font-family: 'Roboto', sans-serif;
+  font-family: var(--font-sans), system-ui, "Segoe UI", Roboto, Ubuntu,
+    "Helvetica Neue", sans-serif;
   margin: 0;
   padding: 0;
   background-color: #1e1e1e;
@@ -1654,13 +1659,15 @@ body.light-theme .step-card a {
 body.dark-theme {
   background: #222 !important;
   color: #fff;
-  font-family: 'Roboto', sans-serif;
+  font-family: var(--font-sans), system-ui, "Segoe UI", Roboto, Ubuntu,
+    "Helvetica Neue", sans-serif;
 }
 
 body.light-theme {
   background: #fff !important;
   color: #333;
-  font-family: 'Arial', sans-serif;
+  font-family: var(--font-sans), system-ui, "Segoe UI", Roboto, Ubuntu,
+    "Helvetica Neue", sans-serif;
 }
 
 .account-details {
@@ -1671,7 +1678,8 @@ body.light-theme {
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
   color: #ffffff;
-  font-family: 'Roboto', sans-serif;
+  font-family: var(--font-sans), system-ui, "Segoe UI", Roboto, Ubuntu,
+    "Helvetica Neue", sans-serif;
   margin-bottom: 30px;
 }
 
@@ -2173,7 +2181,7 @@ body.light-theme .secure-url a {
   .mobile-positions-table-header {
     padding: 0;
     margin: 0;
-    margin-bottom: 10px;
+    /* margin-bottom: 10px; */
   }
 
   .table-container {
@@ -2212,7 +2220,7 @@ body.light-theme .secure-url a {
   }
 
   .mobile-tabs-header {
-    background: #333;
+    /* background: #333; */
     border-bottom: 0;
     position: sticky;
     top: 0;
@@ -2879,7 +2887,8 @@ body.light-theme {
 }
 
 body {
-  font-family: Arial, sans-serif;
+  font-family: var(--font-sans), system-ui, "Segoe UI", Roboto, Ubuntu,
+    "Helvetica Neue", sans-serif;
   margin-top: 50px;
   padding: 0;
   color: #cacaca !important;
@@ -4938,19 +4947,19 @@ body.light-theme .order-confirm-content .c-popup-close {
 }
 
 /* Support Menu Styles - Active state (when badge > 0) */
-.nav-list li a[href*='/Support'].support-active {
+/* .nav-list li a[href*='/Support'].support-active {
   background-color: #ff6b35;
   color: #fff !important;
   padding: 8px 16px;
   border-radius: 20px;
   font-weight: 400;
   transition: background-color 0.3s ease;
-}
+} */
 
-.nav-list li a[href*='/Support'].support-active:hover {
+/* .nav-list li a[href*='/Support'].support-active:hover {
   background-color: #e55a2b;
   color: #fff !important;
-}
+} */
 
 /* Mobile Support Menu - Active state */
 .mobile-nav-list li a[href*='/Support'].support-active {
@@ -4968,12 +4977,12 @@ body.light-theme .order-confirm-content .c-popup-close {
 }
 
 /* Support Menu Normal state (when badge = 0) */
-.nav-list li a[href*='/Support']:not(.support-active) {
+/* .nav-list li a[href*='/Support']:not(.support-active) {
   background-color: transparent;
   color: inherit;
   padding: 8px 16px 8px 0;
   transition: background-color 0.3s ease;
-}
+} */
 
 .mobile-nav-list li a[href*='/Support']:not(.support-active) {
   background-color: transparent;
@@ -5007,15 +5016,15 @@ body.light-theme .order-confirm-content .c-popup-close {
 }
 
 /* Light theme support menu and badge */
-body.light-theme .nav-list li a[href*='/Support'].support-active {
+/* body.light-theme .nav-list li a[href*='/Support'].support-active {
   background-color: #ff6b35;
   color: #fff !important;
-}
+} */
 
-body.light-theme .nav-list li a[href*='/Support'].support-active:hover {
+/* body.light-theme .nav-list li a[href*='/Support'].support-active:hover {
   background-color: #e55a2b;
   color: #fff !important;
-}
+} */
 
 body.light-theme .mobile-nav-list li a[href*='/Support'].support-active {
   background-color: #ff6b35;
@@ -5034,10 +5043,10 @@ body.light-theme .support-badge {
 
 /* Mobile responsive */
 @media (max-width: 768px) {
-  .nav-list li a[href*='/Support'] {
+  /* .nav-list li a[href*='/Support'] {
     padding: 6px 12px;
     font-size: 14px;
-  }
+  } */
 
   .mobile-nav-list li a[href*='/Support'] {
     width: 105px;
@@ -5081,7 +5090,8 @@ body.light-theme .support-badge {
 body {
   background: linear-gradient(180deg, #1e1e1e, #333);
   color: #fff;
-  font-family: 'Arial', sans-serif;
+  font-family: var(--font-sans), system-ui, "Segoe UI", Roboto, Ubuntu,
+    "Helvetica Neue", sans-serif;
   margin: 0;
   padding: 0;
 }
@@ -5117,6 +5127,7 @@ body {
   left: 0;
   width: 100%;
   z-index: 1000;
+  border-bottom: none !important;
 }
 
 .logo,
@@ -5227,7 +5238,7 @@ body.light-theme .footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 10px 10px 30px;
+  padding: 10px 10px 10px 10px;
   margin: 0;
   position: relative;
   box-sizing: border-box;
@@ -6784,7 +6795,7 @@ body.light-theme .mobile-lang-option.active {
   }
 
   .header-container {
-    padding: 0px 10px 0 30px;
+    padding: 0px 10px 0 10px;
     height: 47px;
   }
 
@@ -10884,5 +10895,8 @@ body.light-theme .crypto-options button {
 @media(max-width: 600px) {
   .navigation {
     display: none !important;
+  }
+  .set_width {
+    width: 100% !important;
   }
 }

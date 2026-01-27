@@ -156,8 +156,8 @@
 //         <nav className="navigation">
 //           <div className="nav-list flex items-center justify-start gap-12 text-black dark:text-white font-medium text-sm mt-1">
 //             <li
-//               className="menu-item relative 
-//   after:content-[''] after:absolute after:left-0 after:bottom-0 
+//               className="menu-item relative
+//   after:content-[''] after:absolute after:left-0 after:bottom-0
 //   after:h-[2px] after:w-0 after:bg-[#46c4b3] dark:after:bg-[#46c4b3]
 //   after:transition-all after:duration-300
 //   hover:after:w-full hover:text-[#46c4b3]  dark:hover:text-[#46c4b3]"
@@ -165,8 +165,8 @@
 //               <Link className="font-[400] text-[12px]" href="/Chart">Trade</Link>
 //             </li>
 //             <li
-//               className="menu-item relative 
-//   after:content-[''] after:absolute after:left-0 after:bottom-0 
+//               className="menu-item relative
+//   after:content-[''] after:absolute after:left-0 after:bottom-0
 //   after:h-[2px] after:w-0 after:bg-[#46c4b3] dark:after:bg-[#46c4b3]
 //   after:transition-all after:duration-300
 //   hover:after:w-full hover:text-[#46c4b3] dark:hover:text-[#46c4b3]"
@@ -174,8 +174,8 @@
 //               <Link className="font-[400] text-[12px]" href="/Account/Deposit">Wallet</Link>
 //             </li>
 //             <li
-//               className="menu-item relative 
-//   after:content-[''] after:absolute after:left-0 after:bottom-0 
+//               className="menu-item relative
+//   after:content-[''] after:absolute after:left-0 after:bottom-0
 //   after:h-[2px] after:w-0 after:bg-[#46c4b3] dark:after:bg-[#46c4b3]
 //   after:transition-all after:duration-300
 //   hover:after:w-full hover:text-[#46c4b3]  dark:hover:text-[#46c4b3]"
@@ -183,8 +183,8 @@
 //               <Link className="font-[400] text-[12px]" href="/Portfolio">Portfolio</Link>
 //             </li>
 //             <li
-//               className="menu-item relative 
-//   after:content-[''] after:absolute after:left-0 after:bottom-0 
+//               className="menu-item relative
+//   after:content-[''] after:absolute after:left-0 after:bottom-0
 //   after:h-[2px] after:w-0 after:bg-[#46c4b3] dark:after:bg-[#46c4b3]
 //   after:transition-all after:duration-300
 //   hover:after:w-full hover:text-[#46c4b3]  dark:hover:text-[#46c4b3]"
@@ -192,8 +192,8 @@
 //               <Link className="font-[400] text-[12px]" href="/Earn">Earn</Link>
 //             </li>
 //             <li
-//               className="menu-item relative 
-//   after:content-[''] after:absolute after:left-0 after:bottom-0 
+//               className="menu-item relative
+//   after:content-[''] after:absolute after:left-0 after:bottom-0
 //   after:h-[2px] after:w-0 after:bg-[#46c4b3] dark:after:bg-[#46c4b3]
 //   after:transition-all after:duration-300
 //   hover:after:w-full hover:text-[#46c4b3]  dark:hover:text-[#46c4b3]"
@@ -201,8 +201,8 @@
 //               <Link className="font-[400] text-[12px]" href="/Vault">Vaults</Link>
 //             </li>
 //             <li
-//               className="menu-item relative 
-//   after:content-[''] after:absolute after:left-0 after:bottom-0 
+//               className="menu-item relative
+//   after:content-[''] after:absolute after:left-0 after:bottom-0
 //   after:h-[2px] after:w-0 after:bg-[#46c4b3] dark:after:bg-[#46c4b3]
 //   after:transition-all after:duration-300
 //   hover:after:w-full hover:text-[#46c4b3]  dark:hover:text-[#46c4b3]"
@@ -210,8 +210,8 @@
 //               <Link className="font-[400] text-[12px]" href="/Staking">Staking</Link>
 //             </li>
 //             <li
-//               className="menu-item relative 
-//   after:content-[''] after:absolute after:left-0 after:bottom-0 
+//               className="menu-item relative
+//   after:content-[''] after:absolute after:left-0 after:bottom-0
 //   after:h-[2px] after:w-0 after:bg-[#46c4b3] dark:after:bg-[#46c4b3]
 //   after:transition-all after:duration-300
 //   hover:after:w-full hover:text-[#46c4b3]  dark:hover:text-[#46c4b3]"
@@ -219,8 +219,8 @@
 //               <Link className="font-[400] text-[12px]" href="/Referrals">Referrals</Link>
 //             </li>
 //             <li
-//               className="menu-item relative 
-//   after:content-[''] after:absolute after:left-0 after:bottom-0 
+//               className="menu-item relative
+//   after:content-[''] after:absolute after:left-0 after:bottom-0
 //   after:h-[2px] after:w-0 after:bg-[#46c4b3] dark:after:bg-[#46c4b3]
 //   after:transition-all after:duration-300
 //   hover:after:w-full hover:text-[#46c4b3]  dark:hover:text-[#46c4b3]"
@@ -228,8 +228,8 @@
 //               <Link className="font-[400] text-[12px]" href="/Leaderboard">Leaderboard</Link>
 //             </li>
 //             <li
-//               className="menu-item relative 
-//   after:content-[''] after:absolute after:left-0 after:bottom-0 
+//               className="menu-item relative
+//   after:content-[''] after:absolute after:left-0 after:bottom-0
 //   after:h-[2px] after:w-0 after:bg-[#46c4b3] dark:after:bg-[#46c4b3]
 //   after:transition-all after:duration-300
 //   hover:after:w-full hover:text-[#46c4b3]  dark:hover:text-[#46c4b3]"
@@ -237,8 +237,8 @@
 //               <Link className="font-[400] text-[12px]" href="/Account">Account</Link>
 //             </li>
 //             <li
-//               className="menu-item relative 
-//   after:content-[''] after:absolute after:left-0 after:bottom-0 
+//               className="menu-item relative
+//   after:content-[''] after:absolute after:left-0 after:bottom-0
 //   after:h-[2px] after:w-0 after:bg-[#46c4b3] dark:after:bg-[#46c4b3]
 //   after:transition-all after:duration-300
 //   hover:after:w-full hover:text-[#46c4b3] dark:hover:text-[#46c4b3]"
@@ -246,8 +246,8 @@
 //               <Link className="font-[400] text-[12px]" href="/Faq">FAQ</Link>
 //             </li>
 //             <li
-//               className="menu-item relative 
-//   after:content-[''] after:absolute after:left-0 after:bottom-0 
+//               className="menu-item relative
+//   after:content-[''] after:absolute after:left-0 after:bottom-0
 //   after:h-[2px] after:w-0 after:bg-[#46c4b3] dark:after:bg-[#46c4b3]
 //   after:transition-all after:duration-300
 //   hover:after:w-full hover:text-[#46c4b3] dark:hover:text-[#46c4b3] "
@@ -583,12 +583,10 @@
 //   );
 // }
 
-
-
 "use client";
 
 import { useState } from "react";
-import { Menu, X, Sun, Moon } from "lucide-react";
+import { Menu, X, Sun, Moon, Settings } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { signOut } from "@/lib/actions/auth-actions";
@@ -605,29 +603,19 @@ type Session = typeof auth.$Infer.Session;
 
 const MAIN_LINKS = [
   { href: "/", label: "Trade" },
-  { href: "/Account/Deposit", label: "Wallet" },
   { href: "/Portfolio", label: "Portfolio" },
   { href: "/Earn", label: "Earn" },
   { href: "/Vault", label: "Vaults" },
   { href: "/Staking", label: "Staking" },
   { href: "/Referrals", label: "Referrals" },
   { href: "/Leaderboard", label: "Leaderboard" },
-  { href: "/Account", label: "Account" },
-  { href: "/Faq", label: "FAQ" },
-  { href: "/Support", label: "Support" },
 ];
 
 const EXTRA_LINKS = [
-  { href: "/testnet", label: "Testnet" },
-  { href: "/explorer", label: "Explorer" },
-  { href: "/sub-accounts", label: "Sub-Accounts" },
-  { href: "/api", label: "API" },
-  { href: "/multi-sig", label: "Multi-Sig" },
-  { href: "/points", label: "Points" },
-  { href: "/funding-comparison", label: "Funding Comparison" },
-  { href: "/announcements", label: "Announcements" },
-  { href: "/stats", label: "Stats" },
-  { href: "/docs", label: "Docs" },
+  { href: "/Account/Deposit", label: "Wallet" },
+  { href: "/Account", label: "Account" },
+  { href: "/Faq", label: "FAQ" },
+  { href: "/Support", label: "Support" },
 ];
 
 // -----------------  LOGO COMPONENT  -----------------
@@ -780,6 +768,7 @@ export default function Header({ session }: { session: Session | null }) {
   const [languageOpen, setLanguageOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const [selectedLang, setSelectedLang] = useState("English");
+  const [moreOpen, setMoreOpen] = useState(false);
 
   const languages = [
     { name: "English", flag: "/svg/english.png" },
@@ -812,32 +801,84 @@ export default function Header({ session }: { session: Session | null }) {
   };
 
   return (
-    <header className="header bg-white dark:bg-[#0a0a0a]">
+    <header className="header bg-white dark:bg-[#0F1A1F]">
       {/* TOP BAR */}
-      <div className="header-container flex items-center justify-between px-4 py-3 bg-white dark:bg-[#0a0a0a] border-b border-gray-200 dark:border-gray-800">
+      <div className="header-container flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-800">
         {/* LEFT: Logo + Desktop Nav */}
         <div className="flex items-center gap-8">
           <Logo theme={theme} />
 
           {/* Desktop navigation */}
           <nav className="navigation">
-            <ul className="nav-list flex items-center justify-start gap-8 text-black dark:text-white font-medium text-sm mt-1">
+            <ul className="nav-list flex items-center justify-start gap-18 text-black dark:text-white font-medium text-sm mt-1">
+              {/* MAIN LINKS – as is */}
               {MAIN_LINKS.map((link) => (
                 <li
                   key={link.href}
                   className={`menu-item relative
-                    after:content-[''] after:absolute after:left-0 after:bottom-0 
-                    after:h-[2px] after:w-0 after:bg-[#46c4b3] dark:after:bg-[#46c4b3]
-                    after:transition-all after:duration-300
-                    hover:after:w-full hover:text-[#46c4b3] dark:hover:text-[#46c4b3]
-                    ${isActive(link.href) ? "text-[#46c4b3]" : ""}
-                  `}
+          after:content-[''] after:absolute after:left-0 after:bottom-0 
+          after:h-[2px] after:w-0 after:bg-[#46c4b3] dark:after:bg-[#46c4b3]
+          after:transition-all after:duration-300
+          hover:after:w-full hover:text-[#46c4b3] dark:hover:text-[#46c4b3]
+          ${isActive(link.href) ? "text-[#46c4b3]" : ""}
+        `}
                 >
                   <Link className="font-[400] text-[12px]" href={link.href}>
                     {link.label}
                   </Link>
                 </li>
               ))}
+
+              {/* DESKTOP-ONLY MORE DROPDOWN */}
+              {EXTRA_LINKS.length > 0 && (
+                <li className="relative" style={{background: "transparent !important"}}>
+                  <button
+                    type="button"
+                    onClick={() => setMoreOpen((prev) => !prev)}
+                    style={{background: "transparent !important"}}
+                    className="font-[400] text-[12px] flex items-center gap-2 text-black dark:text-white hover:bg-transparent cursor-pointer"
+                  >
+                    More
+                    <span
+                      className={`inline-block transition-transform duration-200 ${moreOpen ? "rotate-180" : ""
+                      }`}
+                    >
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 11 11"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        style={{transform: "rotate(180deg)"}}
+                      >
+                        <path
+                          d="M1.375 7.7915L5.5 3.6665L9.625 7.7915"
+                          stroke-width="0.7"
+                          stroke="#fff"
+                        ></path>
+                      </svg>
+                    </span>
+                  </button>
+
+                  {moreOpen && (
+                    <div className="absolute left-0 mt-2 w-40 rounded-lg bg-white dark:bg-[#1B2429] border border-gray-300 dark:border-gray-700 shadow-lg z-40">
+                      <ul className="py-1 text-sm text-gray-800 dark:text-gray-100">
+                        {EXTRA_LINKS.map((link) => (
+                          <li key={link.href}>
+                            <Link
+                              href={link.href}
+                              onClick={() => setMoreOpen(false)}
+                              className="block px-3 py-1.5 mb-1 font-[400] text-[12px] hover:text-[#46c4b3]"
+                            >
+                              {link.label}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </li>
+              )}
             </ul>
           </nav>
         </div>
@@ -852,7 +893,7 @@ export default function Header({ session }: { session: Session | null }) {
                   setConnectOpen(true);
                   setMenuOpen(false);
                 }}
-                className="font-[400] text-[12px] text-black dark:text-black py-2 px-4 bg-[#46c4b3] rounded-lg"
+                className="font-[400] text-[12px] cursor-pointer text-black dark:text-black py-2 px-4 bg-[#46c4b3] rounded-lg"
               >
                 Connect
               </button>
@@ -869,7 +910,7 @@ export default function Header({ session }: { session: Session | null }) {
             <>
               <button
                 onClick={handleSignOut}
-                className="bg-[#46c4b3] py-2 px-4 rounded-lg text-black text-[12px]"
+                className="bg-[#46c4b3] cursor-pointer py-2 px-4 rounded-lg text-black text-[12px]"
               >
                 Log Out
               </button>
@@ -880,7 +921,7 @@ export default function Header({ session }: { session: Session | null }) {
           <div className="relative">
             <button
               onClick={toggleLanguage}
-              className="language-icon-btn hover:bg-[#46c4b3] text-black dark:text-white border border-gray-700 rounded-lg p-2"
+              className="language-icon-btn cursor-pointer hover:bg-[#46c4b3] text-black dark:text-white border border-gray-700 rounded-lg p-2"
               aria-label="Change Language"
             >
               <svg
@@ -907,19 +948,19 @@ export default function Header({ session }: { session: Session | null }) {
             </button>
 
             {languageOpen && (
-              <div className="absolute right-0 mt-2 w-40 bg-gray-900 border border-gray-700 rounded-lg shadow-lg z-50">
+              <div className="absolute right-0 mt-2 w-40 bg-[#1b2429] border border-gray-700 rounded-lg shadow-lg z-50">
                 <ul className="py-2">
                   {languages.map((lang) => (
                     <li key={lang.name}>
                       <button
                         onClick={() => handleLanguageSelect(lang.name)}
-                        className="flex items-center gap-2 w-full px-3 py-2 hover:bg-gray-800 text-sm"
+                        className="flex items-center gap-2 w-full px-3 py-2 hover:bg-gray-800 text-[12px]"
                       >
                         <Image
                           src={lang.flag}
                           alt={lang.name}
-                          width={18}
-                          height={18}
+                          width={15}
+                          height={15}
                           className="rounded-full"
                         />
                         {lang.name}
@@ -933,22 +974,23 @@ export default function Header({ session }: { session: Session | null }) {
 
           {/* Theme Toggle */}
           <button
-            onClick={toggleTheme}
-            className="border border-gray-700 rounded-lg p-2 hover:bg-[#46c4b3] dark:hover:bg-gray-800 transition"
+            // onClick={toggleTheme}
+            className="border border-gray-700 cursor-pointer rounded-lg p-2 hover:bg-[#46c4b3] dark:hover:bg-gray-800 transition"
           >
-            {theme === "dark" ? (
+            {/* {theme === "dark" ? (
               <Sun size={15} className="text-white" />
             ) : (
               <Moon size={15} className="text-gray-700 dark:text-gray-200" />
-            )}
+            )} */}
+            <Settings size={15} className="text-white" />
           </button>
 
           {/* Mobile Menu Button */}
           <button
             onClick={toggleMenu}
-            className="md:hidden inline-flex items-center justify-center ml-1 p-2 rounded-md border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+            className="md:hidden inline-flex items-center justify-center p-2 rounded-lg border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
           >
-            {menuOpen ? <X size={20} /> : <Menu size={20} />}
+            {menuOpen ? <X size={15} /> : <Menu size={15} />}
           </button>
         </div>
       </div>
@@ -1077,9 +1119,6 @@ export default function Header({ session }: { session: Session | null }) {
     </header>
   );
 }
-
-
-
 
 /*
 

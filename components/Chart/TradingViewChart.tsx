@@ -913,8 +913,8 @@ const TradingViewChart = ({ symbol }: { symbol: string }) => {
 
       studies: ["Volume@tv-basicstudies"],
 
-      toolbar_bg: theme === "dark" ? "#0b1220" : "#ffffff",
-      backgroundColor: theme === "dark" ? "#0b1220" : "#ffffff",
+      toolbar_bg: theme === "dark" ? "#0F1A1F" : "#ffffff",
+      backgroundColor: theme === "dark" ? "#0F1A1F" : "#ffffff",
 
       container_id: "tv_chart",
     });

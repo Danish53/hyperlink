@@ -198,7 +198,7 @@ export default function Footer() {
     //         </p>
     //       </footer>
     //     </div>
-    <div className=" mt-8 pb-4 flex items-center justify-between px-2 text-[11px] text-gray-300">
+    <div className="py-2 flex items-center justify-between px-2 text-[11px] text-gray-300">
       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#22c55e] bg-[#050f12]">
         <span className="h-2 w-2 rounded-full bg-[#050f12]" />
         <span>Online</span>
