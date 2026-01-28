@@ -928,7 +928,7 @@ const TradingViewChart = ({ symbol }: { symbol: string }) => {
         onReady={() => setReady(true)}
       />
 
-      <div className="w-full h-[600px] rounded-xl overflow-hidden border border-gray-800">
+      <div className="w-full h-[550px] rounded-xl overflow-hidden border border-gray-800">
         <div ref={ref} id="tv_chart" className="w-full h-full" />
       </div>
     </>

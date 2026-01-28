@@ -56,6 +56,39 @@ body.light-theme .faq-menu li {
   margin-bottom: 15px;
 }
 
+
+html {
+  width: 100%;
+  max-width: 100%;
+  /* overflow: hidden; */
+}
+
+body {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  /* IMPORTANT: scrollbar space bilkul reserve nahi hogi */
+  scrollbar-gutter: auto;
+}
+
+/* Scrollbar completely hide + no space */
+body::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+  display: none;
+}
+
+@media(max-width: 600px){
+  .mobile_set{
+    margin-top: 18px;
+  }
+}
+
+
 body.light-theme .faq-category-button {
   background: none;
   border: none;
@@ -5120,7 +5153,7 @@ body {
 .header {
   /*  background-color: #000; */
   margin: 0;
-  padding: 5px;
+  padding: 10px;
   height: auto;
   position: fixed;
   top: 0;
@@ -5199,7 +5232,7 @@ body.light-theme .light-logo {
 } */
 
 .header-container {
-  height: 60px;
+  /* height: 60px; */
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -5238,7 +5271,7 @@ body.light-theme .footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 10px 10px 10px;
+  /* padding: 10px 10px 10px 10px; */
   margin: 0;
   position: relative;
   box-sizing: border-box;
@@ -5518,9 +5551,9 @@ body.dark-theme .banner input[type='email'] {
   border: 1px solid #000;
 }
 
-.button:hover {
+/* .button:hover {
   background: #ffa96f;
-}
+} */
 
 .footer {
   text-align: center;
@@ -6790,13 +6823,13 @@ body.light-theme .mobile-lang-option.active {
   }
 
   .header {
-    height: 47px;
+    /* height: 47px; */
     padding: 0;
   }
 
   .header-container {
-    padding: 0px 10px 0 10px;
-    height: 47px;
+    /* padding: 2px 8px 2px 8px; */
+    /* height: 47px; */
   }
 
   .logo img,
@@ -7137,9 +7170,9 @@ body {
   transform: scale(1.05);
 }
 
-.button:hover {
+/* .button:hover {
   background: #46c4b3;
-}
+} */
 
 .banner {
   position: relative;
@@ -7569,9 +7602,9 @@ body {
   margin-top: 15px;
 }
 
-button:hover {
+/* button:hover {
   background-color: #46c4b3;
-}
+} */
 
 button:active {
   transform: scale(0.95);
@@ -10898,5 +10931,8 @@ body.light-theme .crypto-options button {
   }
   .set_width {
     width: 100% !important;
+  }
+  .header{
+    padding: 10px !important;
   }
 }

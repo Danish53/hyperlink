@@ -766,6 +766,7 @@ export default function Header({ session }: { session: Session | null }) {
   const [connectOpen, setConnectOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(false);
+  const [settingOpen, setsettingOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const [selectedLang, setSelectedLang] = useState("English");
   const [moreOpen, setMoreOpen] = useState(false);
@@ -800,17 +801,24 @@ export default function Header({ session }: { session: Session | null }) {
     setLanguageOpen(false);
   };
 
+
+  const togglesetting = () => setsettingOpen((prev) => !prev);
+
+  // const handlesettingSelect = () => {
+  //   setsettingOpen(false);
+  // };
+
   return (
     <header className="header bg-white dark:bg-[#0F1A1F]">
       {/* TOP BAR */}
-      <div className="header-container flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-800">
+      <div className="header-container flex items-center justify-between dark:border-gray-800">
         {/* LEFT: Logo + Desktop Nav */}
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-[18px]">
           <Logo theme={theme} />
 
           {/* Desktop navigation */}
           <nav className="navigation">
-            <ul className="nav-list flex items-center justify-start gap-18 text-black dark:text-white font-medium text-sm mt-1">
+            <ul className="nav-list flex items-center justify-start gap-[18px] text-black dark:text-white font-medium text-sm mt-1">
               {/* MAIN LINKS – as is */}
               {MAIN_LINKS.map((link) => (
                 <li
@@ -823,7 +831,10 @@ export default function Header({ session }: { session: Session | null }) {
           ${isActive(link.href) ? "text-[#46c4b3]" : ""}
         `}
                 >
-                  <Link className="font-[400] text-[12px]" href={link.href}>
+                  <Link
+                    className="font-[400] text-[12px] py-[8px] px-[10px]"
+                    href={link.href}
+                  >
                     {link.label}
                   </Link>
                 </li>
@@ -831,16 +842,20 @@ export default function Header({ session }: { session: Session | null }) {
 
               {/* DESKTOP-ONLY MORE DROPDOWN */}
               {EXTRA_LINKS.length > 0 && (
-                <li className="relative" style={{background: "transparent !important"}}>
+                <li
+                  className="relative"
+                  style={{ background: "transparent !important" }}
+                >
                   <button
                     type="button"
                     onClick={() => setMoreOpen((prev) => !prev)}
-                    style={{background: "transparent !important"}}
+                    style={{ background: "transparent !important" }}
                     className="font-[400] text-[12px] flex items-center gap-2 text-black dark:text-white hover:bg-transparent cursor-pointer"
                   >
                     More
                     <span
-                      className={`inline-block transition-transform duration-200 ${moreOpen ? "rotate-180" : ""
+                      className={`inline-block transition-transform duration-200 ${
+                        moreOpen ? "rotate-180" : ""
                       }`}
                     >
                       <svg
@@ -849,7 +864,7 @@ export default function Header({ session }: { session: Session | null }) {
                         viewBox="0 0 11 11"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
-                        style={{transform: "rotate(180deg)"}}
+                        style={{ transform: "rotate(180deg)" }}
                       >
                         <path
                           d="M1.375 7.7915L5.5 3.6665L9.625 7.7915"
@@ -861,14 +876,14 @@ export default function Header({ session }: { session: Session | null }) {
                   </button>
 
                   {moreOpen && (
-                    <div className="absolute left-0 mt-2 w-40 rounded-lg bg-white dark:bg-[#1B2429] border border-gray-300 dark:border-gray-700 shadow-lg z-40">
+                    <div className="absolute left-0 mt-2 max-w-[273px] w-[120px] rounded-lg bg-white dark:bg-[#1B2429] border border-gray-300 dark:border-gray-700 shadow-lg z-40">
                       <ul className="py-1 text-sm text-gray-800 dark:text-gray-100">
                         {EXTRA_LINKS.map((link) => (
-                          <li key={link.href}>
+                          <li key={link.href} className="hover:text-[#00D5BE]">
                             <Link
                               href={link.href}
                               onClick={() => setMoreOpen(false)}
-                              className="block px-3 py-1.5 mb-1 font-[400] text-[12px] hover:text-[#46c4b3]"
+                              className="block text-start p-[10px] font-[400] text-[12px] "
                             >
                               {link.label}
                             </Link>
@@ -893,7 +908,7 @@ export default function Header({ session }: { session: Session | null }) {
                   setConnectOpen(true);
                   setMenuOpen(false);
                 }}
-                className="font-[400] text-[12px] cursor-pointer text-black dark:text-black py-2 px-4 bg-[#46c4b3] rounded-lg"
+                className="font-[400] text-[12px] cursor-pointer text-black dark:text-black py-2 px-4 bg-[#46c4b3] hover:bg-[#46c4b5] rounded-lg"
               >
                 Connect
               </button>
@@ -973,17 +988,46 @@ export default function Header({ session }: { session: Session | null }) {
           </div>
 
           {/* Theme Toggle */}
-          <button
-            // onClick={toggleTheme}
-            className="border border-gray-700 cursor-pointer rounded-lg p-2 hover:bg-[#46c4b3] dark:hover:bg-gray-800 transition"
-          >
-            {/* {theme === "dark" ? (
+          <div className="relative">
+            <button
+              onClick={togglesetting}
+              className="border border-gray-700 cursor-pointer rounded-lg p-2 hover:bg-[#46c4b3] dark:hover:bg-gray-800 transition"
+            >
+              {/* {theme === "dark" ? (
               <Sun size={15} className="text-white" />
             ) : (
               <Moon size={15} className="text-gray-700 dark:text-gray-200" />
             )} */}
-            <Settings size={15} className="text-white" />
-          </button>
+              <Settings size={15} className="text-white" />
+            </button>
+            {settingOpen && (
+              <div className="absolute right-0 mt-2 w-[273px] bg-[#1b2429] border border-gray-700 rounded-lg shadow-lg z-50 px-2">
+                <ul className="py-2">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-[#949e9c] text-[12px]">Skip Open Order Confirmation</p>
+                    <input type="checkbox" className="border border-gray-700 bg-none" />
+                  </div>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-[#949e9c] text-[12px]">Skip Close Position Confirmation</p>
+                    <input type="checkbox" />
+                  </div>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-[#949e9c] text-[12px]">Show CCTP Options</p>
+                    <input type="checkbox" />
+                  </div><div className="flex items-center justify-between mb-2">
+                    <p className="text-[#949e9c] text-[12px]">Display Verbose Errors</p>
+                    <input type="checkbox" />
+                  </div><div className="flex items-center justify-between mb-2">
+                    <p className="text-[#949e9c] text-[12px]">Disable Background Fill Notifications</p>
+                    <input type="checkbox" />
+                  </div><div className="flex items-center justify-between mb-2">
+                    <p className="text-[#949e9c] text-[12px]">Customize Layout</p>
+                    <input type="checkbox" />
+                  </div>
+                </ul>
+              </div>
+            )}
+          </div>
 
           {/* Mobile Menu Button */}
           <button
