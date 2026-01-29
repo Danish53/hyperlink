@@ -3671,7 +3671,7 @@ const Chart = ({ session }: { session: any }) => {
                 </svg>
               </div>
               {/* Pair header */}
-              <div className="bg-[#0F1A1F] mx-1 rounded-md h-[63px] flex items-center whitespace-nowrap">
+              <div className="bg-[#0F1A1F] mx-1 rounded-md h-[63px] flex items-center overflow-x-auto whitespace-nowrap">
                 <div className="flex flex-col md:items-center md:justify-between">
                   <div className="flex gap-[16px] sm:flex-row items-center sm:gap-[32px]">
                     {/* Pair + spot badge */}
@@ -3972,18 +3972,9 @@ const Chart = ({ session }: { session: any }) => {
                         </div>
                         <div
                           className="sc-bjfHbI bFBYgR noWrap monospaced"
-                          style={{
-                            color: "rgb(246, 254, 253)",
-                            fontSize: "12px",
-                            display: "block",
-                          }}
+                          style={{color: "rgb(246, 254, 253)", fontSize: "12px", display: "block"}}
                         >
-                          <span
-                            style={{
-                              animation:
-                                "1.8s ease 0s 1 normal none running use-color-change05053352619754738",
-                            }}
-                          >
+                          <span style={{animation: "1.8s ease 0s 1 normal none running use-color-change05053352619754738"}}>
                             {" "}
                             32.659{" "}
                           </span>
@@ -3991,38 +3982,25 @@ const Chart = ({ session }: { session: any }) => {
                       </div>
                       <div
                         className="sc-fEXmlR ejmSgi"
-                        style={{
-                          display: "grid",
-                          gridTemplateRows: "1fr 1fr",
-                          gap: "4px",
-                        }}
+                        style={{display: "grid", gridTemplateRows: "1fr 1fr", gap: "4px"}}
                       >
                         <div>
                           <div
                             className="sc-bjfHbI bFBYgR noWrap"
                             style={{
-                              color: "rgb(148, 158, 156)",
-                              display: "block",
-                              fontSize: "12px",
-                            }}
+                                color: "rgb(148, 158, 156)",
+                                display: "block",
+                                fontSize: "12px",
+                              }}
                           >
                             24H Change
                           </div>
                         </div>
                         <div
                           className="sc-bjfHbI bFBYgR noWrap monospaced"
-                          style={{
-                            color: "rgb(246, 254, 253)",
-                            fontSize: "12px",
-                            display: "block",
-                          }}
+                          style={{color: "rgb(246, 254, 253)", fontSize: "12px", display: "block"}}
                         >
-                          <span
-                            style={{
-                              fontVariantNumeric: "tabular-nums lining-nums",
-                              color: "rgb(237, 112, 136)",
-                            }}
-                          >
+                          <span style={{fontVariantNumeric: "tabular-nums lining-nums", color: "rgb(237, 112, 136)"}}>
                             <span>-0.849</span> / <span>-2.53%</span>
                           </span>
                         </div>
@@ -4039,26 +4017,22 @@ const Chart = ({ session }: { session: any }) => {
                           <div
                             className="sc-bjfHbI bFBYgR noWrap"
                             style={{
-                              color: "rgb(148, 158, 156)",
-                              display: "block",
-                              fontSize: "12px",
-                            }}
+                                color: "rgb(148, 158, 156)",
+                                display: "block",
+                                fontSize: "12px",
+                              }}
                           >
                             24H Volume
                           </div>
                         </div>
                         <div
                           className="sc-bjfHbI bFBYgR noWrap monospaced"
-                          style={{
-                            color: "rgb(246, 254, 253)",
-                            fontSize: "12px",
-                            display: "block",
-                          }}
+                          style={{color: "rgb(246, 254, 253)", fontSize: "12px", display: "block"}}
                         >
                           <span>
                             <div
                               className="sc-pyfCe gKZuHd"
-                              style={{ display: "inline-block" }}
+                              style={{display: "inline-block"}}
                             >
                               179,841,161.50 USDC
                             </div>
@@ -4077,80 +4051,55 @@ const Chart = ({ session }: { session: any }) => {
                           <div
                             className="sc-bjfHbI bFBYgR noWrap"
                             style={{
-                              color: "rgb(148, 158, 156)",
-                              display: "block",
-                              fontSize: "12px",
-                            }}
+                                color: "rgb(148, 158, 156)",
+                                display: "block",
+                                fontSize: "12px",
+                              }}
                           >
                             Market Cap
                           </div>
                         </div>
                         <div
                           className="sc-bjfHbI bFBYgR noWrap monospaced"
-                          style={{
-                            color: "rgb(246, 254, 253)",
-                            fontSize: "12px",
-                            display: "block",
-                          }}
+                          style={{color: "rgb(246, 254, 253)", fontSize: "12px", display: "block"}}
                         >
                           9,835,456,319 USDC
                         </div>
                       </div>
                       <div
                         className="sc-fEXmlR ejmSgi"
-                        style={{
-                          display: "grid",
-                          gridTemplateRows: "1fr 1fr",
-                          gap: "4px",
-                        }}
+                        style={{display: "grid", gridTemplateRows: "1fr 1fr", gap: "4px"}}
                       >
                         <div>
                           <div
                             className="sc-bjfHbI bFBYgR noWrap"
                             style={{
-                              color: "rgb(148, 158, 156)",
-                              display: "block",
-                              fontSize: "12px",
-                            }}
+                                color: "rgb(148, 158, 156)",
+                                display: "block",
+                                fontSize: "12px",
+                              }}
                           >
                             Contract
                           </div>
                         </div>
                         <div
                           className="sc-bjfHbI bFBYgR noWrap monospaced"
-                          style={{
-                            color: "rgb(246, 254, 253)",
-                            fontSize: "12px",
-                            display: "block",
-                          }}
+                          style={{color: "rgb(246, 254, 253)", fontSize: "12px", display: "block"}}
                         >
                           <div
                             className=""
-                            style={{
-                              display: "flex",
-                              flexDirection: "row",
-                              gap: "8px",
-                              alignItems: "center",
-                            }}
+                            style={{display: "flex", flexDirection: "row", gap: "8px", alignItems: "center"}}
                           >
                             0x0d01...11ec
                             <div
                               className=""
-                              style={{
-                                display: "flex",
-                                flexDirection: "row",
-                                gap: "8px",
-                                alignItems: "center",
-                              }}
+                              style={{display: "flex", flexDirection: "row", gap: "8px", alignItems: "center"}}
                             >
                               <a
                                 target="_blank"
                                 href="explorer/token/0x0d01dc56dcaaca66ad901c959b4011ec"
                                 rel="noreferrer"
-                                style={{
-                                  color: "gray",
-                                  textDecoration: "none",
-                                }}
+                                style={{color: "gray", textDecoration: "none"}}
                               >
                                 {" "}
                                 <svg
@@ -4160,7 +4109,7 @@ const Chart = ({ session }: { session: any }) => {
                                   aria-hidden="true"
                                   viewBox="-2 -2 16 16"
                                   className="sc-eDvSVe KHlvw"
-                                  style={{ marginBottom: "-2.4px" }}
+                                  style={{marginBottom: "-2.4px"}}
                                 >
                                   <path
                                     d="M2.16649 1C1.52217 1 0.999851 1.52233 0.999851 2.16667V9.83333C0.999851 10.4777 1.52217 11 2.16649 11H9.83294C10.4773 11 10.9996 10.4777 10.9996 9.83333V7.16667C10.9996 6.89053 11.2235 6.66667 11.4996 6.66667C11.7757 6.66667 11.9995 6.89053 11.9995 7.16667V9.83333C11.9995 11.0299 11.0295 12 9.83294 12H2.16649C0.969905 12 -0.00012207 11.0299 -0.00012207 9.83333V2.16667C-0.00012207 0.970047 0.969905 0 2.16649 0H4.83308C5.10921 0 5.33308 0.22386 5.33308 0.5C5.33308 0.77614 5.10921 1 4.83308 1H2.16649ZM6.66634 0.5C6.66634 0.22386 6.89021 0 7.16634 0H11.4999C11.776 0 11.9999 0.22386 11.9999 0.5V4.83333C11.9999 5.10947 11.776 5.33333 11.4999 5.33333C11.2237 5.33333 10.9999 5.10947 10.9999 4.83333V1.70716L7.51988 5.18693C7.32461 5.38213 7.00808 5.38213 6.81281 5.18687C6.61755 4.9916 6.61755 4.675 6.81281 4.47976L10.2929 1H7.16634C6.89021 1 6.66634 0.77614 6.66634 0.5Z"
@@ -4170,15 +4119,9 @@ const Chart = ({ session }: { session: any }) => {
                               </a>
                               <div
                                 className="sc-pyfCe gKZuHd"
-                                style={{ display: "inline-block" }}
+                                style={{display: "inline-block"}}
                               >
-                                <div
-                                  style={{
-                                    cursor: "pointer",
-                                    padding: "0px",
-                                    lineHeight: "12px",
-                                  }}
-                                >
+                                <div style={{cursor: "pointer", padding: "0px", lineHeight: "12px"}}>
                                   <svg
                                     width="14"
                                     height="14"
