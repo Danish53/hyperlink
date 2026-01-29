@@ -3514,15 +3514,24 @@
 
 // export default Chart;
 
-"use client";
+/* ============================= Trade Drawer ============================= */
 
-import { useState } from "react";
-import TradingViewChart from "./TradingViewChart";
+"use client";
+import { useEffect, useMemo, useRef, useState } from "react";
+// import TradingViewChart from "./TradingViewChart";
 import Footer from "../shared/footer";
 import Header from "../shared/header";
 import MarketsModal from "../../components/MarketsDropdown";
-import { Search, X } from "lucide-react";
-
+import {
+  BarChart3,
+  ChevronDown,
+  Search,
+  SortAsc,
+  UserCircle2,
+  Wallet2,
+  X,
+} from "lucide-react";
+import Link from "next/link";
 type OrderBookTab = "orderbook" | "trades";
 type BottomTab =
   | "Balances"
@@ -3592,12 +3601,179 @@ const mainTabs = [
 ] as const;
 
 type MainTab = (typeof mainTabs)[number];
+type TopTab = "Chart" | "Order Book" | "Trades";
 
 const subTabs: SubTab[] = ["All", "xyz", "flx", "vntl", "hyna", "km", "cash"];
 
 interface MarketsModalProps {
   open: boolean;
   onClose: () => void;
+}
+
+function TradingViewChart({
+  symbol = "HYPEUSDC",
+  interval = "60",
+  height = 550,
+}: {
+  symbol?: string;
+  interval?: string;
+  height?: number;
+}) {
+  const container = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let script: HTMLScriptElement | null = null;
+
+    const init = () => {
+      if (!container.current || !window.TradingView) return;
+
+      // Clear container to avoid duplicates on re-render
+      container.current.innerHTML = "";
+
+      new window.TradingView.widget({
+        autosize: true,
+        symbol,
+        interval, // "60" => 1h like screenshot
+        timezone: "Etc/UTC",
+        theme: "dark",
+        style: "1",
+        locale: "en",
+        toolbar_bg: "#0F1A1F",
+        hide_top_toolbar: false,
+        hide_side_toolbar: false, // left toolbar visible (screenshot)
+        withdateranges: true,
+        allow_symbol_change: false,
+        container_id: container.current.id,
+        studies: ["Volume@tv-basicstudies"],
+        backgroundColor: "#0F1A1F",
+        gridColor: "rgba(255,255,255,0.08)",
+        loading_screen: {
+          backgroundColor: "#0F1A1F",
+          foregroundColor: "#0F1A1F",
+        },
+        drawings_access: {
+          type: "black",
+          tools: [{ name: "Regression Trend" }],
+        },
+        disabled_features: [
+          "header_settings",
+          "header_compare",
+          "header_fullscreen_button",
+          "header_saveload",
+          "save_chart_properties_to_local_storage",
+          "legend_widget",
+          "header_undo_redo",
+        ],
+        enabled_features: ["items_favoriting"],
+      });
+    };
+
+    if (!window.TradingView) {
+      script = document.createElement("script");
+      script.src = "https://s3.tradingview.com/tv.js";
+      script.async = true;
+      script.onload = init;
+      document.body.appendChild(script);
+    } else {
+      init();
+    }
+
+    return () => {
+      if (script) script.onload = null;
+    };
+  }, [symbol, interval]);
+
+  return (
+    <div
+      id="tv_chart_container_mobile"
+      ref={container}
+      style={{ width: "100%", height }}
+      className="rounded-md overflow-hidden"
+    />
+  );
+}
+
+function TradingViewChartt({
+  symbol = "HYPEUSDC",
+  interval = "60",
+  height = 400,
+}: {
+  symbol?: string;
+  interval?: string;
+  height?: number;
+}) {
+  const container = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let script: HTMLScriptElement | null = null;
+
+    const init = () => {
+      if (!container.current || !window.TradingView) return;
+
+      // Clear container to avoid duplicates on re-render
+      container.current.innerHTML = "";
+
+      new window.TradingView.widget({
+        autosize: true,
+        symbol,
+        interval, // "60" => 1h like screenshot
+        timezone: "Etc/UTC",
+        theme: "dark",
+        style: "1",
+        locale: "en",
+        toolbar_bg: "#0F1A1F",
+        hide_top_toolbar: false,
+        hide_side_toolbar: false, // left toolbar visible (screenshot)
+        withdateranges: true,
+        allow_symbol_change: false,
+        container_id: container.current.id,
+        studies: ["Volume@tv-basicstudies"],
+        backgroundColor: "#0F1A1F",
+        gridColor: "rgba(255,255,255,0.08)",
+        loading_screen: {
+          backgroundColor: "#0F1A1F",
+          foregroundColor: "#0F1A1F",
+        },
+        drawings_access: {
+          type: "black",
+          tools: [{ name: "Regression Trend" }],
+        },
+        disabled_features: [
+          "header_settings",
+          "header_compare",
+          "header_fullscreen_button",
+          "header_saveload",
+          "save_chart_properties_to_local_storage",
+          "legend_widget",
+          "header_undo_redo",
+        ],
+        enabled_features: ["items_favoriting"],
+      });
+    };
+
+    if (!window.TradingView) {
+      script = document.createElement("script");
+      script.src = "https://s3.tradingview.com/tv.js";
+      script.async = true;
+      script.onload = init;
+      document.body.appendChild(script);
+    } else {
+      init();
+    }
+
+    return () => {
+      if (script) script.onload = null;
+    };
+  }, [symbol, interval]);
+
+  return (
+    <div
+      id="tv_chart_container"
+      ref={container}
+      style={{ width: "100%", height }}
+      className="rounded-md overflow-hidden"
+    />
+  );
 }
 
 const sellOrders = [
@@ -3629,12 +3805,26 @@ const Chart = ({ session }: { session: any }) => {
   const [tradeMode, setTradeMode] = useState<TradeMode>("Market");
   const [tradeSide, setTradeSide] = useState<TradeSide>("Buy");
   const [sizePercent, setSizePercent] = useState(0);
+  const [isTradeOpen, setIsTradeOpen] = useState(false);
 
   const [moreOpen, setMoreOpen] = useState(false);
 
   const [mainTab, setMainTab] = useState<MainTab>("HIP-3");
   const [subTab, setSubTab] = useState<SubTab>("All");
   const [search, setSearch] = useState("");
+  const [topTab, setTopTab] = useState<TopTab>("Chart");
+  // const [bottomTab, setBottomTab] = useState<BottomTab>("Balances");
+  const [hideSmall, setHideSmall] = useState(true);
+
+  const price = useMemo(
+    () => ({
+      last: "32.500",
+      changeAbs: "-0.569",
+      changePct: "-1.72%",
+      isUp: false,
+    }),
+    [],
+  );
 
   if (!open) return null;
 
@@ -3644,498 +3834,566 @@ const Chart = ({ session }: { session: any }) => {
     return matchesSub && matchesSearch;
   });
 
+  const recentTrades = [
+    { time: "20:08:21", price: "32.520", size: "0.42", side: "sell" as const },
+    { time: "20:08:17", price: "32.535", size: "1.02", side: "buy" as const },
+    { time: "20:08:11", price: "32.500", size: "0.13", side: "sell" as const },
+    { time: "20:08:08", price: "32.495", size: "0.77", side: "sell" as const },
+  ];
+
   return (
-    <div className="bg-[#050B11] text-white">
-      <Header session={session} />
-      {/* 0F1A1F */}
-      <main className="bg-white dark:bg-[#1B2429] mx-auto w-full flex flex-col mobile_set mt-[54px] lg:flex-row  ">
-        {/* LEFT: PAIR HEADER + CHART + BOTTOM TABS */}
-        <div className="flex-1">
-          <div className="flex flex-col md:flex-row">
-            <div className="flex flex-col flex-1 min-w-0 border-r border-[#111827]">
-              <div className="bg-[#0F1A1F] m-1 rounded-md px-3 h-[40px] flex items-center">
-                <svg
-                  width="12"
-                  height="12"
-                  stroke="#FFB648"
-                  fill="#FFB648"
-                  focusable="false"
-                  aria-hidden="true"
-                  viewBox="0 0 16 16"
-                  className="sc-eDvSVe ghLAkI"
-                >
-                  <path
-                    d="M7.19178 2.0681C7.52192 1.39918 8.47578 1.39917 8.80592 2.0681L10.3779 5.25325L13.8929 5.76401C14.6311 5.87127 14.9259 6.77847 14.3917 7.29913L11.8482 9.7784L12.4487 13.2793C12.5747 14.0145 11.8031 14.5751 11.1428 14.228L7.99885 12.5751L4.85493 14.228C4.19467 14.5751 3.42298 14.0145 3.54908 13.2793L4.14952 9.7784L1.60603 7.29913C1.07186 6.77847 1.36662 5.87127 2.10482 5.76401L5.61984 5.25325L7.19178 2.0681Z"
-                    className="sc-bcXHqe iaMRsW"
-                  ></path>
-                </svg>
-              </div>
-              {/* Pair header */}
-              <div className="bg-[#0F1A1F] mx-1 rounded-md h-[63px] flex items-center overflow-x-auto whitespace-nowrap">
-                <div className="flex flex-col md:items-center md:justify-between">
-                  <div className="flex gap-[16px] sm:flex-row items-center sm:gap-[32px]">
-                    {/* Pair + spot badge */}
-                    <div className="flex items-center gap-1">
-                      <div className="relative inline-block p-2">
-                        <span
-                          className="text-[16px] sm:text-[20px] line-[27px] flex gap-2 items-center cursor-pointer"
-                          onClick={() => setMoreOpen((prev) => !prev)}
-                        >
-                          <svg
-                            width="32"
-                            height="30"
-                            viewBox="0 0 26 30"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                            style={{ transform: "translateY(2px)" }}
+    <>
+      <div className="all_trade_desk bg-[#050B11] text-white">
+        <Header session={session} />
+        {/* 0F1A1F */}
+        <main className="bg-white dark:bg-[#1B2429] mx-auto w-full flex flex-col mobile_set mt-[54px] lg:flex-row  ">
+          {/* LEFT: PAIR HEADER + CHART + BOTTOM TABS */}
+          <div className="flex-1">
+            <div className="flex flex-col md:flex-row">
+              <div className="flex flex-col flex-1 min-w-0 border-r border-[#111827]">
+                <div className="bg-[#0F1A1F] m-1 rounded-md px-3 h-[40px] flex items-center">
+                  <svg
+                    width="12"
+                    height="12"
+                    stroke="#FFB648"
+                    fill="#FFB648"
+                    focusable="false"
+                    aria-hidden="true"
+                    viewBox="0 0 16 16"
+                    className="sc-eDvSVe ghLAkI"
+                  >
+                    <path
+                      d="M7.19178 2.0681C7.52192 1.39918 8.47578 1.39917 8.80592 2.0681L10.3779 5.25325L13.8929 5.76401C14.6311 5.87127 14.9259 6.77847 14.3917 7.29913L11.8482 9.7784L12.4487 13.2793C12.5747 14.0145 11.8031 14.5751 11.1428 14.228L7.99885 12.5751L4.85493 14.228C4.19467 14.5751 3.42298 14.0145 3.54908 13.2793L4.14952 9.7784L1.60603 7.29913C1.07186 6.77847 1.36662 5.87127 2.10482 5.76401L5.61984 5.25325L7.19178 2.0681Z"
+                      className="sc-bcXHqe iaMRsW"
+                    ></path>
+                  </svg>
+                </div>
+                {/* Pair header */}
+                <div className="bg-[#0F1A1F] mx-1 rounded-md h-[63px] flex items-center whitespace-nowrap">
+                  <div className="flex flex-col md:items-center md:justify-between">
+                    <div className="flex gap-[16px] sm:flex-row items-center sm:gap-[32px]">
+                      {/* Pair + spot badge */}
+                      <div className="flex items-center gap-1">
+                        <div className="relative inline-block p-2">
+                          <span
+                            className="text-[16px] sm:text-[20px] line-[27px] flex gap-2 items-center cursor-pointer"
+                            onClick={() => setMoreOpen((prev) => !prev)}
                           >
-                            <g clipPath="url(#clip0_623_29714)">
+                            <svg
+                              width="32"
+                              height="30"
+                              viewBox="0 0 26 30"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                              style={{ transform: "translateY(2px)" }}
+                            >
+                              <g clipPath="url(#clip0_623_29714)">
+                                <path
+                                  d="M20.4523 14.5389C20.471 16.2176 20.1196 17.8218 19.4292 19.3544C18.4434 21.5368 16.0799 23.3213 13.9218 21.4218C12.1616 19.8736 11.8351 16.7306 9.19798 16.2705C5.7088 15.8477 5.62483 19.8923 3.34536 20.3492C0.804661 20.8653 -0.0380915 16.5938 -0.000774032 14.6539C0.0365434 12.714 0.552769 9.98759 2.76072 9.98759C5.30142 9.98759 5.47245 13.8332 8.69731 13.6249C11.8911 13.4073 11.947 9.40624 14.0337 7.69329C15.8343 6.2135 17.952 7.29847 19.0125 9.07982C19.9952 10.7275 20.4274 12.6612 20.4492 14.5389H20.4523Z"
+                                  fill="#46c4b3"
+                                ></path>
+                              </g>
+                              <defs>
+                                <clipPath id="clip0_623_29714">
+                                  <rect
+                                    width="115"
+                                    height="32"
+                                    fill="white"
+                                  ></rect>
+                                </clipPath>
+                              </defs>
+                            </svg>
+                            HYPE/USDC
+                            <svg
+                              width="15"
+                              height="15"
+                              viewBox="0 0 11 11"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                              style={{ transform: "rotate(180deg)" }}
+                              className="font-bolder mx-2"
+                            >
                               <path
-                                d="M20.4523 14.5389C20.471 16.2176 20.1196 17.8218 19.4292 19.3544C18.4434 21.5368 16.0799 23.3213 13.9218 21.4218C12.1616 19.8736 11.8351 16.7306 9.19798 16.2705C5.7088 15.8477 5.62483 19.8923 3.34536 20.3492C0.804661 20.8653 -0.0380915 16.5938 -0.000774032 14.6539C0.0365434 12.714 0.552769 9.98759 2.76072 9.98759C5.30142 9.98759 5.47245 13.8332 8.69731 13.6249C11.8911 13.4073 11.947 9.40624 14.0337 7.69329C15.8343 6.2135 17.952 7.29847 19.0125 9.07982C19.9952 10.7275 20.4274 12.6612 20.4492 14.5389H20.4523Z"
-                                fill="#46c4b3"
+                                d="M1.375 7.7915L5.5 3.6665L9.625 7.7915"
+                                stroke-width="0.7"
+                                stroke="#fff"
                               ></path>
-                            </g>
-                            <defs>
-                              <clipPath id="clip0_623_29714">
-                                <rect
-                                  width="115"
-                                  height="32"
-                                  fill="white"
-                                ></rect>
-                              </clipPath>
-                            </defs>
-                          </svg>
-                          HYPE/USDC
-                          <svg
-                            width="15"
-                            height="15"
-                            viewBox="0 0 11 11"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                            style={{ transform: "rotate(180deg)" }}
-                            className="font-bolder mx-2"
-                          >
-                            <path
-                              d="M1.375 7.7915L5.5 3.6665L9.625 7.7915"
-                              stroke-width="0.7"
-                              stroke="#fff"
-                            ></path>
-                          </svg>
-                        </span>
-                        {moreOpen && (
-                          <div className="absolute left-0 mt-2 w-[800px] rounded-lg bg-white dark:bg-[#1B2429] border border-gray-300 dark:border-gray-700 shadow-lg z-40">
-                            <div className="flex flex-col text-white">
-                              {/* Search + Strict/All + Close */}
-                              <div className="flex w-full items-center gap-3 px-4 py-3">
-                                <div className="relative flex gap-2 items-center w-full">
-                                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6b7280] z-40 hidden md:block" />
-                                  <input
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                    placeholder="Search"
-                                    className="w-full text-[12px] border border-gray-700 rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder-[#6b7280] focus:outline-none focus:border-teal-400"
-                                  />
-                                </div>
-                                <div className="w-[120px]">
-                                  <div className="flex rounded-lg bg-[#273035] text-sm">
-                                    <button
-                                      onClick={() => setTradeSide("Buy")}
-                                      className={`flex-1 text-[12px] py-1.5 rounded-lg ${
-                                        tradeSide === "Buy"
-                                          ? "bg-teal-400 text-black"
-                                          : "text-[#8b9bb5]"
-                                      }`}
-                                    >
-                                      Strict
-                                    </button>
-                                    <button
-                                      onClick={() => setTradeSide("Sell")}
-                                      className={`flex-1 text-[12px] py-1.5 rounded-lg ${
-                                        tradeSide === "Sell"
-                                          ? "bg-teal-400 text-black"
-                                          : "text-[#8b9bb5]"
-                                      }`}
-                                    >
-                                      All
-                                    </button>
+                            </svg>
+                          </span>
+                          {moreOpen && (
+                            <div className="absolute left-0 mt-2 w-[800px] rounded-lg bg-white dark:bg-[#1B2429] border border-gray-300 dark:border-gray-700 shadow-lg z-40">
+                              <div className="flex flex-col text-white">
+                                {/* Search + Strict/All + Close */}
+                                <div className="flex w-full items-center gap-3 px-4 py-3">
+                                  <div className="relative flex gap-2 items-center w-full">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6b7280] z-40 hidden md:block" />
+                                    <input
+                                      value={search}
+                                      onChange={(e) =>
+                                        setSearch(e.target.value)
+                                      }
+                                      placeholder="Search"
+                                      className="w-full text-[12px] border border-gray-700 rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder-[#6b7280] focus:outline-none focus:border-teal-400"
+                                    />
                                   </div>
-                                  <div className="hidden sm:flex items-center gap-2">
-                                    <button className="px-4 py-1.5 rounded bg-teal-400 text-black text-xs font-semibold">
-                                      Strict
-                                    </button>
-                                    <button className="px-4 py-1.5 rounded bg-[#020915] border border-[#1f2933] text-xs text-[#cbd5f5]">
-                                      All
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Main tabs */}
-                              <div className="flex items-center gap-4 px-4 pt-2 text-[12px] text-[#9ca3af] border-b border-gray-700 overflow-x-auto">
-                                {mainTabs.map((tab) => (
-                                  <button
-                                    key={tab}
-                                    onClick={() => setMainTab(tab)}
-                                    className={`pb-2 border-b-2 whitespace-nowrap ${
-                                      mainTab === tab
-                                        ? "border-teal-400 text-teal-300"
-                                        : "border-transparent hover:text-slate-100"
-                                    }`}
-                                  >
-                                    {tab}
-                                  </button>
-                                ))}
-                              </div>
-
-                              {/* Sub tabs */}
-                              <div className="flex items-center gap-4 px-4 pt-3 text-[11px] text-[#9ca3af] border-b border-gray-700 overflow-x-auto">
-                                {subTabs.map((tab) => (
-                                  <button
-                                    key={tab}
-                                    onClick={() => setSubTab(tab)}
-                                    className={` border-b-2 uppercase whitespace-nowrap ${
-                                      subTab === tab
-                                        ? "border-teal-400 text-teal-300"
-                                        : "border-transparent hover:text-slate-100"
-                                    }`}
-                                  >
-                                    {tab}
-                                  </button>
-                                ))}
-                              </div>
-
-                              {/* Table */}
-                              <div className="flex-1 overflow-auto">
-                                <table className="min-w-full text-[12px] px-3 w-full border-0 border-separate">
-                                  <thead className="sticky top-0 z-10">
-                                    <tr className="text-[#9ca3af] text-[11px] font-[400] border-0">
-                                      <th className="px-4 py-2 text-left font-normal ">
-                                        Symbol
-                                      </th>
-                                      <th className="px-2 py-2 text-right font-normal">
-                                        Last Price
-                                      </th>
-                                      <th className="px-2 py-2 text-right font-normal">
-                                        24H Change
-                                      </th>
-                                      <th className="px-2 py-2 text-right font-normal">
-                                        8H Funding
-                                      </th>
-                                      <th className="px-2 py-2 text-right font-normal">
-                                        Volume
-                                      </th>
-                                      <th className="px-4 py-2 text-right font-normal">
-                                        Open Interest
-                                      </th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {filteredMarkets.map((row, idx) => (
-                                      <tr
-                                        key={row.symbol + idx}
-                                        className={`border-b border-[#111827] hover:bg-[#07121b] ${
-                                          row.highlight ? "" : ""
+                                  <div className="w-[120px]">
+                                    <div className="flex rounded-lg bg-[#273035] text-sm">
+                                      <button
+                                        onClick={() => setTradeSide("Buy")}
+                                        className={`flex-1 text-[12px] py-1.5 rounded-lg ${
+                                          tradeSide === "Buy"
+                                            ? "bg-teal-400 text-black"
+                                            : "text-[#8b9bb5]"
                                         }`}
                                       >
-                                        <td className="px-2 py-1 whitespace-nowrap">
-                                          <div className="flex items-center gap-2">
-                                            <span className="text-yellow-400 text-sm">
-                                              ★
-                                            </span>
-                                            <span className="text-[13px]">
-                                              {row.symbol}
-                                            </span>
-                                            <span className="px-1.5 py-0.5 rounded bg-[#0b2730] text-teal-300 text-[11px]">
-                                              {row.leverage}
-                                            </span>
-                                            <span className="px-1.5 py-0.5 rounded bg-[#0b2730] text-teal-300 text-[11px] uppercase">
-                                              {row.tag}
-                                            </span>
-                                          </div>
-                                        </td>
-                                        <td className="px-2 py-2 text-right text-[13px]">
-                                          {row.lastPrice}
-                                        </td>
-                                        <td
-                                          className={`px-2 py-2 text-right text-[12px] ${
-                                            row.isUp
-                                              ? "text-emerald-400"
-                                              : "text-red-400"
+                                        Strict
+                                      </button>
+                                      <button
+                                        onClick={() => setTradeSide("Sell")}
+                                        className={`flex-1 text-[12px] py-1.5 rounded-lg ${
+                                          tradeSide === "Sell"
+                                            ? "bg-teal-400 text-black"
+                                            : "text-[#8b9bb5]"
+                                        }`}
+                                      >
+                                        All
+                                      </button>
+                                    </div>
+                                    <div className="hidden sm:flex items-center gap-2">
+                                      <button className="px-4 py-1.5 rounded bg-teal-400 text-black text-xs font-semibold">
+                                        Strict
+                                      </button>
+                                      <button className="px-4 py-1.5 rounded bg-[#020915] border border-[#1f2933] text-xs text-[#cbd5f5]">
+                                        All
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Main tabs */}
+                                <div className="flex items-center gap-4 px-4 pt-2 text-[12px] text-[#9ca3af] border-b border-gray-700 overflow-x-auto">
+                                  {mainTabs.map((tab) => (
+                                    <button
+                                      key={tab}
+                                      onClick={() => setMainTab(tab)}
+                                      className={`pb-2 border-b-2 whitespace-nowrap ${
+                                        mainTab === tab
+                                          ? "border-teal-400 text-teal-300"
+                                          : "border-transparent hover:text-slate-100"
+                                      }`}
+                                    >
+                                      {tab}
+                                    </button>
+                                  ))}
+                                </div>
+
+                                {/* Sub tabs */}
+                                <div className="flex items-center gap-4 px-4 pt-3 text-[11px] text-[#9ca3af] border-b border-gray-700 overflow-x-auto">
+                                  {subTabs.map((tab) => (
+                                    <button
+                                      key={tab}
+                                      onClick={() => setSubTab(tab)}
+                                      className={` border-b-2 uppercase whitespace-nowrap ${
+                                        subTab === tab
+                                          ? "border-teal-400 text-teal-300"
+                                          : "border-transparent hover:text-slate-100"
+                                      }`}
+                                    >
+                                      {tab}
+                                    </button>
+                                  ))}
+                                </div>
+
+                                {/* Table */}
+                                <div className="flex-1 overflow-auto">
+                                  <table className="min-w-full text-[12px] px-3 w-full border-0 border-separate">
+                                    <thead className="sticky top-0 z-10">
+                                      <tr className="text-[#9ca3af] text-[11px] font-[400] border-0">
+                                        <th className="px-4 py-2 text-left font-normal ">
+                                          Symbol
+                                        </th>
+                                        <th className="px-2 py-2 text-right font-normal">
+                                          Last Price
+                                        </th>
+                                        <th className="px-2 py-2 text-right font-normal">
+                                          24H Change
+                                        </th>
+                                        <th className="px-2 py-2 text-right font-normal">
+                                          8H Funding
+                                        </th>
+                                        <th className="px-2 py-2 text-right font-normal">
+                                          Volume
+                                        </th>
+                                        <th className="px-4 py-2 text-right font-normal">
+                                          Open Interest
+                                        </th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {filteredMarkets.map((row, idx) => (
+                                        <tr
+                                          key={row.symbol + idx}
+                                          className={`border-b border-[#111827] hover:bg-[#07121b] ${
+                                            row.highlight ? "" : ""
                                           }`}
                                         >
-                                          {row.change}{" "}
-                                          <span className="text-[11px]">
-                                            {row.changePct}
-                                          </span>
-                                        </td>
-                                        <td className="px-2 py-2 text-right text-[12px] text-[#9ca3af]">
-                                          {row.funding}
-                                        </td>
-                                        <td className="px-2 py-2 text-right text-[12px] text-[#cbd5f5]">
-                                          {row.volume}
-                                        </td>
-                                        <td className="px-4 py-2 text-right text-[12px] text-[#cbd5f5] whitespace-nowrap">
-                                          {row.openInterest}
-                                        </td>
-                                      </tr>
-                                    ))}
+                                          <td className="px-2 py-1 whitespace-nowrap">
+                                            <div className="flex items-center gap-2">
+                                              <span className="text-yellow-400 text-sm">
+                                                ★
+                                              </span>
+                                              <span className="text-[13px]">
+                                                {row.symbol}
+                                              </span>
+                                              <span className="px-1.5 py-0.5 rounded bg-[#0b2730] text-teal-300 text-[11px]">
+                                                {row.leverage}
+                                              </span>
+                                              <span className="px-1.5 py-0.5 rounded bg-[#0b2730] text-teal-300 text-[11px] uppercase">
+                                                {row.tag}
+                                              </span>
+                                            </div>
+                                          </td>
+                                          <td className="px-2 py-2 text-right text-[13px]">
+                                            {row.lastPrice}
+                                          </td>
+                                          <td
+                                            className={`px-2 py-2 text-right text-[12px] ${
+                                              row.isUp
+                                                ? "text-emerald-400"
+                                                : "text-red-400"
+                                            }`}
+                                          >
+                                            {row.change}{" "}
+                                            <span className="text-[11px]">
+                                              {row.changePct}
+                                            </span>
+                                          </td>
+                                          <td className="px-2 py-2 text-right text-[12px] text-[#9ca3af]">
+                                            {row.funding}
+                                          </td>
+                                          <td className="px-2 py-2 text-right text-[12px] text-[#cbd5f5]">
+                                            {row.volume}
+                                          </td>
+                                          <td className="px-4 py-2 text-right text-[12px] text-[#cbd5f5] whitespace-nowrap">
+                                            {row.openInterest}
+                                          </td>
+                                        </tr>
+                                      ))}
 
-                                    {filteredMarkets.length === 0 && (
-                                      <tr>
-                                        <td
-                                          colSpan={6}
-                                          className="px-4 py-8 text-center text-[#6b7280]"
-                                        >
-                                          No markets found
-                                        </td>
-                                      </tr>
-                                    )}
-                                  </tbody>
-                                </table>
-                              </div>
+                                      {filteredMarkets.length === 0 && (
+                                        <tr>
+                                          <td
+                                            colSpan={6}
+                                            className="px-4 py-8 text-center text-[#6b7280]"
+                                          >
+                                            No markets found
+                                          </td>
+                                        </tr>
+                                      )}
+                                    </tbody>
+                                  </table>
+                                </div>
 
-                              {/* Bottom hotkey bar */}
-                              <div className="flex flex-wrap items-center gap-x-6 gap-y-1 px-4 py-2 border-t border-[#111827] text-[11px] text-[#9ca3af]">
-                                <span>
-                                  <span className="px-1.5 py-0.5 rounded bg-[#111827] mr-1">
-                                    ⌘K
+                                {/* Bottom hotkey bar */}
+                                <div className="flex flex-wrap items-center gap-x-6 gap-y-1 px-4 py-2 border-t border-[#111827] text-[11px] text-[#9ca3af]">
+                                  <span>
+                                    <span className="px-1.5 py-0.5 rounded bg-[#111827] mr-1">
+                                      ⌘K
+                                    </span>
+                                    Open
                                   </span>
-                                  Open
-                                </span>
-                                <span>
-                                  <span className="px-1.5 py-0.5 rounded bg-[#111827] mr-1">
-                                    →
+                                  <span>
+                                    <span className="px-1.5 py-0.5 rounded bg-[#111827] mr-1">
+                                      →
+                                    </span>
+                                    Navigate
                                   </span>
-                                  Navigate
-                                </span>
-                                <span>
-                                  <span className="px-1.5 py-0.5 rounded bg-[#111827] mr-1">
-                                    Enter
+                                  <span>
+                                    <span className="px-1.5 py-0.5 rounded bg-[#111827] mr-1">
+                                      Enter
+                                    </span>
+                                    Select
                                   </span>
-                                  Select
-                                </span>
-                                <span>
-                                  <span className="px-1.5 py-0.5 rounded bg-[#111827] mr-1">
-                                    ★
+                                  <span>
+                                    <span className="px-1.5 py-0.5 rounded bg-[#111827] mr-1">
+                                      ★
+                                    </span>
+                                    Favorite
                                   </span>
-                                  Favorite
-                                </span>
-                                <span className="ml-auto">
-                                  <span className="px-1.5 py-0.5 rounded bg-[#111827] mr-1">
-                                    Esc
+                                  <span className="ml-auto">
+                                    <span className="px-1.5 py-0.5 rounded bg-[#111827] mr-1">
+                                      Esc
+                                    </span>
+                                    Close
                                   </span>
-                                  Close
-                                </span>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        )}
+                          )}
+                        </div>
+                        <span className="px-2 py-0.5 rounded bg-[#071720] text-teal-300 text-[11px] border border-[#11343f]">
+                          Spot
+                        </span>
                       </div>
-                      <span className="px-2 py-0.5 rounded bg-[#071720] text-teal-300 text-[11px] border border-[#11343f]">
-                        Spot
-                      </span>
-                    </div>
 
-                    <div
-                      style={{
-                        overflowX: "scroll",
-                        scrollbarWidth: "none",
-                        display: "grid",
-                        gridTemplateColumns: "repeat(6, auto)",
-                        gap: "32px",
-                        alignItems: "center",
-                      }}
-                    >
                       <div
                         style={{
+                          overflowX: "scroll",
+                          scrollbarWidth: "none",
                           display: "grid",
-                          gridTemplateRows: "1fr 1fr",
-                          gap: "4px",
+                          gridTemplateColumns: "repeat(6, auto)",
+                          gap: "32px",
+                          alignItems: "center",
                         }}
                       >
-                        <div>
+                        <div
+                          style={{
+                            display: "grid",
+                            gridTemplateRows: "1fr 1fr",
+                            gap: "4px",
+                          }}
+                        >
+                          <div>
+                            <div
+                              className="sc-pyfCe gKZuHd"
+                              style={{ display: "inline-block" }}
+                            >
+                              <p
+                                className="sc-bjfHbI bFBYgR underline noWrap"
+                                style={{
+                                  color: "rgb(148, 158, 156)",
+                                  display: "block",
+                                  fontSize: "12px",
+                                }}
+                              >
+                                Price
+                              </p>
+                            </div>
+                          </div>
                           <div
-                            className="sc-pyfCe gKZuHd"
-                            style={{ display: "inline-block" }}
+                            className="sc-bjfHbI bFBYgR noWrap monospaced"
+                            style={{
+                              color: "rgb(246, 254, 253)",
+                              fontSize: "12px",
+                              display: "block",
+                            }}
                           >
-                            <p
-                              className="sc-bjfHbI bFBYgR underline noWrap"
+                            <span
+                              style={{
+                                animation:
+                                  "1.8s ease 0s 1 normal none running use-color-change05053352619754738",
+                              }}
+                            >
+                              {" "}
+                              32.659{" "}
+                            </span>
+                          </div>
+                        </div>
+                        <div
+                          className="sc-fEXmlR ejmSgi"
+                          style={{
+                            display: "grid",
+                            gridTemplateRows: "1fr 1fr",
+                            gap: "4px",
+                          }}
+                        >
+                          <div>
+                            <div
+                              className="sc-bjfHbI bFBYgR noWrap"
                               style={{
                                 color: "rgb(148, 158, 156)",
                                 display: "block",
                                 fontSize: "12px",
                               }}
                             >
-                              Price
-                            </p>
-                          </div>
-                        </div>
-                        <div
-                          className="sc-bjfHbI bFBYgR noWrap monospaced"
-                          style={{color: "rgb(246, 254, 253)", fontSize: "12px", display: "block"}}
-                        >
-                          <span style={{animation: "1.8s ease 0s 1 normal none running use-color-change05053352619754738"}}>
-                            {" "}
-                            32.659{" "}
-                          </span>
-                        </div>
-                      </div>
-                      <div
-                        className="sc-fEXmlR ejmSgi"
-                        style={{display: "grid", gridTemplateRows: "1fr 1fr", gap: "4px"}}
-                      >
-                        <div>
-                          <div
-                            className="sc-bjfHbI bFBYgR noWrap"
-                            style={{
-                                color: "rgb(148, 158, 156)",
-                                display: "block",
-                                fontSize: "12px",
-                              }}
-                          >
-                            24H Change
-                          </div>
-                        </div>
-                        <div
-                          className="sc-bjfHbI bFBYgR noWrap monospaced"
-                          style={{color: "rgb(246, 254, 253)", fontSize: "12px", display: "block"}}
-                        >
-                          <span style={{fontVariantNumeric: "tabular-nums lining-nums", color: "rgb(237, 112, 136)"}}>
-                            <span>-0.849</span> / <span>-2.53%</span>
-                          </span>
-                        </div>
-                      </div>
-                      <div
-                        className="sc-fEXmlR ejmSgi"
-                        style={{
-                          display: "grid",
-                          gridTemplateRows: "1fr 1fr",
-                          gap: "4px",
-                        }}
-                      >
-                        <div>
-                          <div
-                            className="sc-bjfHbI bFBYgR noWrap"
-                            style={{
-                                color: "rgb(148, 158, 156)",
-                                display: "block",
-                                fontSize: "12px",
-                              }}
-                          >
-                            24H Volume
-                          </div>
-                        </div>
-                        <div
-                          className="sc-bjfHbI bFBYgR noWrap monospaced"
-                          style={{color: "rgb(246, 254, 253)", fontSize: "12px", display: "block"}}
-                        >
-                          <span>
-                            <div
-                              className="sc-pyfCe gKZuHd"
-                              style={{display: "inline-block"}}
-                            >
-                              179,841,161.50 USDC
+                              24H Change
                             </div>
-                          </span>
-                        </div>
-                      </div>
-                      <div
-                        className="sc-fEXmlR ejmSgi"
-                        style={{
-                          display: "grid",
-                          gridTemplateRows: "1fr 1fr",
-                          gap: "4px",
-                        }}
-                      >
-                        <div>
-                          <div
-                            className="sc-bjfHbI bFBYgR noWrap"
-                            style={{
-                                color: "rgb(148, 158, 156)",
-                                display: "block",
-                                fontSize: "12px",
-                              }}
-                          >
-                            Market Cap
                           </div>
-                        </div>
-                        <div
-                          className="sc-bjfHbI bFBYgR noWrap monospaced"
-                          style={{color: "rgb(246, 254, 253)", fontSize: "12px", display: "block"}}
-                        >
-                          9,835,456,319 USDC
-                        </div>
-                      </div>
-                      <div
-                        className="sc-fEXmlR ejmSgi"
-                        style={{display: "grid", gridTemplateRows: "1fr 1fr", gap: "4px"}}
-                      >
-                        <div>
                           <div
-                            className="sc-bjfHbI bFBYgR noWrap"
+                            className="sc-bjfHbI bFBYgR noWrap monospaced"
                             style={{
-                                color: "rgb(148, 158, 156)",
-                                display: "block",
-                                fontSize: "12px",
+                              color: "rgb(246, 254, 253)",
+                              fontSize: "12px",
+                              display: "block",
+                            }}
+                          >
+                            <span
+                              style={{
+                                fontVariantNumeric: "tabular-nums lining-nums",
+                                color: "rgb(237, 112, 136)",
                               }}
-                          >
-                            Contract
-                          </div>
-                        </div>
-                        <div
-                          className="sc-bjfHbI bFBYgR noWrap monospaced"
-                          style={{color: "rgb(246, 254, 253)", fontSize: "12px", display: "block"}}
-                        >
-                          <div
-                            className=""
-                            style={{display: "flex", flexDirection: "row", gap: "8px", alignItems: "center"}}
-                          >
-                            0x0d01...11ec
-                            <div
-                              className=""
-                              style={{display: "flex", flexDirection: "row", gap: "8px", alignItems: "center"}}
                             >
-                              <a
-                                target="_blank"
-                                href="explorer/token/0x0d01dc56dcaaca66ad901c959b4011ec"
-                                rel="noreferrer"
-                                style={{color: "gray", textDecoration: "none"}}
-                              >
-                                {" "}
-                                <svg
-                                  width="14"
-                                  height="14"
-                                  focusable="false"
-                                  aria-hidden="true"
-                                  viewBox="-2 -2 16 16"
-                                  className="sc-eDvSVe KHlvw"
-                                  style={{marginBottom: "-2.4px"}}
-                                >
-                                  <path
-                                    d="M2.16649 1C1.52217 1 0.999851 1.52233 0.999851 2.16667V9.83333C0.999851 10.4777 1.52217 11 2.16649 11H9.83294C10.4773 11 10.9996 10.4777 10.9996 9.83333V7.16667C10.9996 6.89053 11.2235 6.66667 11.4996 6.66667C11.7757 6.66667 11.9995 6.89053 11.9995 7.16667V9.83333C11.9995 11.0299 11.0295 12 9.83294 12H2.16649C0.969905 12 -0.00012207 11.0299 -0.00012207 9.83333V2.16667C-0.00012207 0.970047 0.969905 0 2.16649 0H4.83308C5.10921 0 5.33308 0.22386 5.33308 0.5C5.33308 0.77614 5.10921 1 4.83308 1H2.16649ZM6.66634 0.5C6.66634 0.22386 6.89021 0 7.16634 0H11.4999C11.776 0 11.9999 0.22386 11.9999 0.5V4.83333C11.9999 5.10947 11.776 5.33333 11.4999 5.33333C11.2237 5.33333 10.9999 5.10947 10.9999 4.83333V1.70716L7.51988 5.18693C7.32461 5.38213 7.00808 5.38213 6.81281 5.18687C6.61755 4.9916 6.61755 4.675 6.81281 4.47976L10.2929 1H7.16634C6.89021 1 6.66634 0.77614 6.66634 0.5Z"
-                                    fill="#50D2C1"
-                                  ></path>
-                                </svg>
-                              </a>
+                              <span>-0.849</span> / <span>-2.53%</span>
+                            </span>
+                          </div>
+                        </div>
+                        <div
+                          className="sc-fEXmlR ejmSgi"
+                          style={{
+                            display: "grid",
+                            gridTemplateRows: "1fr 1fr",
+                            gap: "4px",
+                          }}
+                        >
+                          <div>
+                            <div
+                              className="sc-bjfHbI bFBYgR noWrap"
+                              style={{
+                                color: "rgb(148, 158, 156)",
+                                display: "block",
+                                fontSize: "12px",
+                              }}
+                            >
+                              24H Volume
+                            </div>
+                          </div>
+                          <div
+                            className="sc-bjfHbI bFBYgR noWrap monospaced"
+                            style={{
+                              color: "rgb(246, 254, 253)",
+                              fontSize: "12px",
+                              display: "block",
+                            }}
+                          >
+                            <span>
                               <div
                                 className="sc-pyfCe gKZuHd"
-                                style={{display: "inline-block"}}
+                                style={{ display: "inline-block" }}
                               >
-                                <div style={{cursor: "pointer", padding: "0px", lineHeight: "12px"}}>
+                                179,841,161.50 USDC
+                              </div>
+                            </span>
+                          </div>
+                        </div>
+                        <div
+                          className="sc-fEXmlR ejmSgi"
+                          style={{
+                            display: "grid",
+                            gridTemplateRows: "1fr 1fr",
+                            gap: "4px",
+                          }}
+                        >
+                          <div>
+                            <div
+                              className="sc-bjfHbI bFBYgR noWrap"
+                              style={{
+                                color: "rgb(148, 158, 156)",
+                                display: "block",
+                                fontSize: "12px",
+                              }}
+                            >
+                              Market Cap
+                            </div>
+                          </div>
+                          <div
+                            className="sc-bjfHbI bFBYgR noWrap monospaced"
+                            style={{
+                              color: "rgb(246, 254, 253)",
+                              fontSize: "12px",
+                              display: "block",
+                            }}
+                          >
+                            9,835,456,319 USDC
+                          </div>
+                        </div>
+                        <div
+                          className="sc-fEXmlR ejmSgi"
+                          style={{
+                            display: "grid",
+                            gridTemplateRows: "1fr 1fr",
+                            gap: "4px",
+                          }}
+                        >
+                          <div>
+                            <div
+                              className="sc-bjfHbI bFBYgR noWrap"
+                              style={{
+                                color: "rgb(148, 158, 156)",
+                                display: "block",
+                                fontSize: "12px",
+                              }}
+                            >
+                              Contract
+                            </div>
+                          </div>
+                          <div
+                            className="sc-bjfHbI bFBYgR noWrap monospaced"
+                            style={{
+                              color: "rgb(246, 254, 253)",
+                              fontSize: "12px",
+                              display: "block",
+                            }}
+                          >
+                            <div
+                              className=""
+                              style={{
+                                display: "flex",
+                                flexDirection: "row",
+                                gap: "8px",
+                                alignItems: "center",
+                              }}
+                            >
+                              0x0d01...11ec
+                              <div
+                                className=""
+                                style={{
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  gap: "8px",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <a
+                                  target="_blank"
+                                  href="explorer/token/0x0d01dc56dcaaca66ad901c959b4011ec"
+                                  rel="noreferrer"
+                                  style={{
+                                    color: "gray",
+                                    textDecoration: "none",
+                                  }}
+                                >
+                                  {" "}
                                   <svg
                                     width="14"
                                     height="14"
                                     focusable="false"
                                     aria-hidden="true"
-                                    viewBox="0 -960 960 900"
-                                    className="sc-eDvSVe ghLAkI"
+                                    viewBox="-2 -2 16 16"
+                                    className="sc-eDvSVe KHlvw"
+                                    style={{ marginBottom: "-2.4px" }}
                                   >
                                     <path
-                                      d="M240-160q-66 0-113-47T80-320v-320q0-66 47-113t113-47h480q66 0 113 47t47 113v320q0 66-47 113t-113 47H240Zm0-480h480q22 0 42 5t38 16v-21q0-33-23.5-56.5T720-720H240q-33 0-56.5 23.5T160-640v21q18-11 38-16t42-5Zm-74 130 445 108q9 2 18 0t17-8l139-116q-11-15-28-24.5t-37-9.5H240q-26 0-45.5 13.5T166-510Z"
+                                      d="M2.16649 1C1.52217 1 0.999851 1.52233 0.999851 2.16667V9.83333C0.999851 10.4777 1.52217 11 2.16649 11H9.83294C10.4773 11 10.9996 10.4777 10.9996 9.83333V7.16667C10.9996 6.89053 11.2235 6.66667 11.4996 6.66667C11.7757 6.66667 11.9995 6.89053 11.9995 7.16667V9.83333C11.9995 11.0299 11.0295 12 9.83294 12H2.16649C0.969905 12 -0.00012207 11.0299 -0.00012207 9.83333V2.16667C-0.00012207 0.970047 0.969905 0 2.16649 0H4.83308C5.10921 0 5.33308 0.22386 5.33308 0.5C5.33308 0.77614 5.10921 1 4.83308 1H2.16649ZM6.66634 0.5C6.66634 0.22386 6.89021 0 7.16634 0H11.4999C11.776 0 11.9999 0.22386 11.9999 0.5V4.83333C11.9999 5.10947 11.776 5.33333 11.4999 5.33333C11.2237 5.33333 10.9999 5.10947 10.9999 4.83333V1.70716L7.51988 5.18693C7.32461 5.38213 7.00808 5.38213 6.81281 5.18687C6.61755 4.9916 6.61755 4.675 6.81281 4.47976L10.2929 1H7.16634C6.89021 1 6.66634 0.77614 6.66634 0.5Z"
                                       fill="#50D2C1"
-                                      className="sc-bcXHqe iaMRsW"
                                     ></path>
                                   </svg>
+                                </a>
+                                <div
+                                  className="sc-pyfCe gKZuHd"
+                                  style={{ display: "inline-block" }}
+                                >
+                                  <div
+                                    style={{
+                                      cursor: "pointer",
+                                      padding: "0px",
+                                      lineHeight: "12px",
+                                    }}
+                                  >
+                                    <svg
+                                      width="14"
+                                      height="14"
+                                      focusable="false"
+                                      aria-hidden="true"
+                                      viewBox="0 -960 960 900"
+                                      className="sc-eDvSVe ghLAkI"
+                                    >
+                                      <path
+                                        d="M240-160q-66 0-113-47T80-320v-320q0-66 47-113t113-47h480q66 0 113 47t47 113v320q0 66-47 113t-113 47H240Zm0-480h480q22 0 42 5t38 16v-21q0-33-23.5-56.5T720-720H240q-33 0-56.5 23.5T160-640v21q18-11 38-16t42-5Zm-74 130 445 108q9 2 18 0t17-8l139-116q-11-15-28-24.5t-37-9.5H240q-26 0-45.5 13.5T166-510Z"
+                                        fill="#50D2C1"
+                                        className="sc-bcXHqe iaMRsW"
+                                      ></path>
+                                    </svg>
+                                  </div>
                                 </div>
                               </div>
                             </div>
@@ -4145,214 +4403,213 @@ const Chart = ({ session }: { session: any }) => {
                     </div>
                   </div>
                 </div>
+
+                {/* Chart */}
+                <div className="flex-1 m-1">
+                  <TradingViewChart symbol="BTC" />
+                </div>
               </div>
 
-              {/* Chart */}
-              <div className="flex-1 m-1">
-                <TradingViewChart symbol="BTC" />
+              {/* MIDDLE: ORDER BOOK / TRADES */}
+              <div className="w-[284px] h-[650px] set_width flex flex-col border-r border-[#111827] bg-[#0F1A1F] my-1 rounded-md">
+                {/* Tabs */}
+                <div className="flex border-b border-gray-700 text-sm">
+                  <button
+                    onClick={() => setOrderBookTab("orderbook")}
+                    className={`flex-1 py-2 text-[12px] font-medium cursor-pointer ${
+                      orderBookTab === "orderbook"
+                        ? "text-teal-300 border-b-2 border-teal-400"
+                        : "text-[#8b9bb5]"
+                    }`}
+                  >
+                    Order Book
+                  </button>
+                  <button
+                    onClick={() => setOrderBookTab("trades")}
+                    className={`flex-1 py-3 text-[12px] font-medium cursor-pointer ${
+                      orderBookTab === "trades"
+                        ? "text-teal-300 border-b-2 border-teal-400"
+                        : "text-[#8b9bb5]"
+                    }`}
+                  >
+                    Trades
+                  </button>
+                </div>
+
+                {/* Top controls */}
+                <div className="flex items-center justify-between px-3 py-2 text-[11px] text-[#8b9bb5]">
+                  <span>0.001 ▾</span>
+                  <span>HYPE ▾</span>
+                </div>
+
+                {/* Column headers */}
+                <div
+                  className="flex justify-between px-3 py-2 text-[11px] text-[#8b9bb5]"
+                  style={{ marginTop: "0px !important" }}
+                >
+                  <span>Price</span>
+                  <span className="text-right">Size (HYPE)</span>
+                  <span className="text-right">Total (HYPE)</span>
+                </div>
+
+                {/* Order book content */}
+                <div className="flex-1 overflow-y-auto text-xs">
+                  {/* Sell orders */}
+                  {sellOrders.map((row, idx) => (
+                    <div
+                      key={`sell-${idx}`}
+                      className="relative flex justify-between px-3 py-[4px]"
+                    >
+                      <div
+                        className="absolute inset-y-0 right-0 bg-red-500/15"
+                        style={{ width: `${row.depth}%` }}
+                      />
+                      <span className="text-red-400 z-10">{row.price}</span>
+                      <span className="text-right z-10">{row.size}</span>
+                      <span className="text-right z-10">{row.total}</span>
+                    </div>
+                  ))}
+
+                  {/* Spread */}
+                  <div className="flex justify-between px-3 py-2 bg-[#07121b] text-[11px] text-[#8b9bb5]">
+                    <span>Spread</span>
+                    <span>0.000</span>
+                    <span>0.022%</span>
+                  </div>
+
+                  {/* Buy orders */}
+                  {buyOrders.map((row, idx) => (
+                    <div
+                      key={`buy-${idx}`}
+                      className="relative flex justify-between px-3 py-[4px]"
+                    >
+                      <div
+                        className="absolute inset-y-0 left-0 bg-green-500/15"
+                        style={{ width: `${row.depth}%` }}
+                      />
+                      <span className="text-green-400 z-10">{row.price}</span>
+                      <span className="text-right z-10">{row.size}</span>
+                      <span className="text-right z-10">{row.total}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Bottom filter / hide small balances (same as screenshot) */}
               </div>
             </div>
 
-            {/* MIDDLE: ORDER BOOK / TRADES */}
-            <div className="w-[284px] h-[650px] set_width flex flex-col border-r border-[#111827] bg-[#0F1A1F] my-1 rounded-md">
-              {/* Tabs */}
-              <div className="flex border-b border-gray-700 text-sm">
-                <button
-                  onClick={() => setOrderBookTab("orderbook")}
-                  className={`flex-1 py-2 text-[12px] font-medium cursor-pointer ${
-                    orderBookTab === "orderbook"
-                      ? "text-teal-300 border-b-2 border-teal-400"
-                      : "text-[#8b9bb5]"
-                  }`}
-                >
-                  Order Book
-                </button>
-                <button
-                  onClick={() => setOrderBookTab("trades")}
-                  className={`flex-1 py-3 text-[12px] font-medium cursor-pointer ${
-                    orderBookTab === "trades"
-                      ? "text-teal-300 border-b-2 border-teal-400"
-                      : "text-[#8b9bb5]"
-                  }`}
-                >
-                  Trades
-                </button>
-              </div>
-
-              {/* Top controls */}
-              <div className="flex items-center justify-between px-3 py-2 text-[11px] text-[#8b9bb5]">
-                <span>0.001 ▾</span>
-                <span>HYPE ▾</span>
-              </div>
-
-              {/* Column headers */}
-              <div
-                className="flex justify-between px-3 py-2 text-[11px] text-[#8b9bb5]"
-                style={{ marginTop: "0px !important" }}
-              >
-                <span>Price</span>
-                <span className="text-right">Size (HYPE)</span>
-                <span className="text-right">Total (HYPE)</span>
-              </div>
-
-              {/* Order book content */}
-              <div className="flex-1 overflow-y-auto text-xs">
-                {/* Sell orders */}
-                {sellOrders.map((row, idx) => (
-                  <div
-                    key={`sell-${idx}`}
-                    className="relative flex justify-between px-3 py-[4px]"
-                  >
-                    <div
-                      className="absolute inset-y-0 right-0 bg-red-500/15"
-                      style={{ width: `${row.depth}%` }}
-                    />
-                    <span className="text-red-400 z-10">{row.price}</span>
-                    <span className="text-right z-10">{row.size}</span>
-                    <span className="text-right z-10">{row.total}</span>
-                  </div>
-                ))}
-
-                {/* Spread */}
-                <div className="flex justify-between px-3 py-2 bg-[#07121b] text-[11px] text-[#8b9bb5]">
-                  <span>Spread</span>
-                  <span>0.000</span>
-                  <span>0.022%</span>
+            {/* Bottom tabs / balances */}
+            <div className="flex flex-col text-xs bg-[#0F1A1F] h-auto mx-1 rounded-md mb-1 p-2 h-[250px]">
+              {/* Tabs + Filter row */}
+              <div className="flex flex-col sm:flex-row sm:items-center border-b border-[#111827]">
+                {/* Tabs (scrollable on mobile) */}
+                <div className="flex overflow-x-auto sm:overflow-visible -mb-px">
+                  {[
+                    "Balances",
+                    "Positions",
+                    "Open Orders",
+                    "TWAP",
+                    "Trade History",
+                    "Funding History",
+                    "Order History",
+                  ].map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => setBottomTab(tab as BottomTab)}
+                      className={`px-4 py-2 whitespace-nowrap flex-shrink-0 font-medium transition border-b-2 ${
+                        bottomTab === tab
+                          ? "border-teal-400 text-teal-300"
+                          : "border-transparent text-[#8b9bb5] hover:text-white"
+                      }`}
+                    >
+                      {tab}
+                    </button>
+                  ))}
                 </div>
 
-                {/* Buy orders */}
-                {buyOrders.map((row, idx) => (
-                  <div
-                    key={`buy-${idx}`}
-                    className="relative flex justify-between px-3 py-[4px]"
-                  >
-                    <div
-                      className="absolute inset-y-0 left-0 bg-green-500/15"
-                      style={{ width: `${row.depth}%` }}
+                {/* Filter + Hide Small Balances */}
+                <div className="flex items-center gap-3 px-4 py-2 sm:py-0 sm:ml-auto text-[11px] text-[#8b9bb5] shrink-0">
+                  <button className="hover:text-white">Filter</button>
+                  <label className="flex items-center gap-1 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="accent-teal-400 h-3 w-3"
+                      defaultChecked
                     />
-                    <span className="text-green-400 z-10">{row.price}</span>
-                    <span className="text-right z-10">{row.size}</span>
-                    <span className="text-right z-10">{row.total}</span>
-                  </div>
-                ))}
+                    <span>Hide Small Balances</span>
+                  </label>
+                </div>
               </div>
 
-              {/* Bottom filter / hide small balances (same as screenshot) */}
+              {/* Content */}
+              <div className="px-4 py-4 text-[#8b9bb5]">
+                {bottomTab === "Balances" ? (
+                  <p>No balances yet</p>
+                ) : (
+                  <p>No {bottomTab.toLowerCase()} yet</p>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Bottom tabs / balances */}
-          <div className="flex flex-col text-xs bg-[#0F1A1F] h-auto mx-1 rounded-md mb-1 p-2 h-[250px]">
-            {/* Tabs + Filter row */}
-            <div className="flex flex-col sm:flex-row sm:items-center border-b border-[#111827]">
-              {/* Tabs (scrollable on mobile) */}
-              <div className="flex overflow-x-auto sm:overflow-visible -mb-px">
-                {[
-                  "Balances",
-                  "Positions",
-                  "Open Orders",
-                  "TWAP",
-                  "Trade History",
-                  "Funding History",
-                  "Order History",
-                ].map((tab) => (
-                  <button
-                    key={tab}
-                    onClick={() => setBottomTab(tab as BottomTab)}
-                    className={`px-4 py-2 whitespace-nowrap flex-shrink-0 font-medium transition border-b-2 ${
-                      bottomTab === tab
-                        ? "border-teal-400 text-teal-300"
-                        : "border-transparent text-[#8b9bb5] hover:text-white"
-                    }`}
-                  >
-                    {tab}
-                  </button>
-                ))}
-              </div>
-
-              {/* Filter + Hide Small Balances */}
-              <div className="flex items-center gap-3 px-4 py-2 sm:py-0 sm:ml-auto text-[11px] text-[#8b9bb5] shrink-0">
-                <button className="hover:text-white">Filter</button>
-                <label className="flex items-center gap-1 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="accent-teal-400 h-3 w-3"
-                    defaultChecked
-                  />
-                  <span>Hide Small Balances</span>
-                </label>
-              </div>
+          {/* RIGHT: TRADE PANEL */}
+          <div className="w-[284px] set_width flex flex-col bg-[#0F1A1F] p-2 m-1 rounded-md pb-12">
+            {/* Trade mode tabs */}
+            <div className="flex border-b border-[#111827] text-sm">
+              {(["Market", "Limit", "Pro"] as TradeMode[]).map((mode) => (
+                <button
+                  key={mode}
+                  onClick={() => setTradeMode(mode)}
+                  className={`flex-1 text-[12px] py-2 cursor-pointer font-medium ${
+                    tradeMode === mode
+                      ? "text-teal-300 border-b-2 border-teal-400"
+                      : "text-[#8b9bb5]"
+                  }`}
+                >
+                  {mode}
+                </button>
+              ))}
             </div>
 
             {/* Content */}
-            <div className="px-4 py-4 text-[#8b9bb5]">
-              {bottomTab === "Balances" ? (
-                <p>No balances yet</p>
-              ) : (
-                <p>No {bottomTab.toLowerCase()} yet</p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* RIGHT: TRADE PANEL */}
-        <div className="w-[284px] set_width flex flex-col bg-[#0F1A1F] p-2 m-1 rounded-md pb-12">
-          {/* Trade mode tabs */}
-          <div className="flex border-b border-[#111827] text-sm">
-            {(["Market", "Limit", "Pro"] as TradeMode[]).map((mode) => (
-              <button
-                key={mode}
-                onClick={() => setTradeMode(mode)}
-                className={`flex-1 text-[12px] py-2 cursor-pointer font-medium ${
-                  tradeMode === mode
-                    ? "text-teal-300 border-b-2 border-teal-400"
-                    : "text-[#8b9bb5]"
-                }`}
-              >
-                {mode}
-              </button>
-            ))}
-          </div>
-
-          {/* Content */}
-          <div className="flex-1 p-4 flex flex-col gap-4 text-xs">
-            {/* Buy / Sell toggle */}
-            <div className="flex rounded-lg bg-[#273035] text-sm">
-              <button
-                onClick={() => setTradeSide("Buy")}
-                className={`flex-1 text-[12px] py-2 rounded-lg ${
-                  tradeSide === "Buy"
-                    ? "bg-teal-400 text-black"
-                    : "text-[#8b9bb5]"
-                }`}
-              >
-                Buy
-              </button>
-              <button
-                onClick={() => setTradeSide("Sell")}
-                className={`flex-1 text-[12px] py-2 rounded-lg ${
-                  tradeSide === "Sell"
-                    ? "bg-teal-400 text-black"
-                    : "text-[#8b9bb5]"
-                }`}
-              >
-                Sell
-              </button>
-            </div>
-
-            {/* Available to trade */}
-            <div className="flex justify-between text-[11px] text-[#8b9bb5]">
-              <span className="underline">Available to Trade</span>
-              <span className="text-white">0.00 USDC</span>
-            </div>
-
-            {/* Size + slider */}
-            <div className="space-y-2">
-              <div className="flex justify-between text-[11px] text-[#8b9bb5] p-2 border border-gray-700 rounded-lg">
-                <span>Size</span>
-                <span>HYPE</span>
+            <div className="flex-1 p-4 flex flex-col gap-4 text-xs">
+              {/* Buy / Sell toggle */}
+              <div className="flex rounded-lg bg-[#273035] text-sm">
+                <button
+                  onClick={() => setTradeSide("Buy")}
+                  className={`flex-1 text-[12px] py-2 rounded-lg ${
+                    tradeSide === "Buy"
+                      ? "bg-teal-400 text-black"
+                      : "text-[#8b9bb5]"
+                  }`}
+                >
+                  Buy
+                </button>
+                <button
+                  onClick={() => setTradeSide("Sell")}
+                  className={`flex-1 text-[12px] py-2 rounded-lg ${
+                    tradeSide === "Sell"
+                      ? "bg-teal-400 text-black"
+                      : "text-[#8b9bb5]"
+                  }`}
+                >
+                  Sell
+                </button>
               </div>
-              {/* <input
+
+              {/* Available to trade */}
+              <div className="flex justify-between text-[11px] text-[#8b9bb5]">
+                <span className="underline">Available to Trade</span>
+                <span className="text-white">0.00 USDC</span>
+              </div>
+
+              {/* Size + slider */}
+              <div className="space-y-2">
+                <div className="flex justify-between text-[11px] text-[#8b9bb5] p-2 border border-gray-700 rounded-lg">
+                  <span>Size</span>
+                  <span>HYPE</span>
+                </div>
+                {/* <input
                 type="range"
                 min={0}
                 max={100}
@@ -4360,92 +4617,760 @@ const Chart = ({ session }: { session: any }) => {
                 onChange={(e) => setSizePercent(Number(e.target.value))}
                 className="w-full accent-teal-400"
               /> */}
-              {/* <div className="flex justify-between text-[11px] text-[#8b9bb5]">
+                {/* <div className="flex justify-between text-[11px] text-[#8b9bb5]">
                 <span>0%</span>
                 <span>{sizePercent}%</span>
               </div> */}
-            </div>
-
-            {/* Connect button */}
-            <button className="w-full py-2 rounded-lg bg-teal-400 text-black text-[12px] hover:bg-teal-300 mt-[200px]">
-              Connect
-            </button>
-
-            {/* Order value / fees */}
-            <div className="space-y-1 text-[11px] text-[#8b9bb5] border-t border-[#111827] pt-3">
-              <div className="flex justify-between">
-                <span>Order Value</span>
-                <span className="text-white">N/A</span>
               </div>
-              <div className="flex justify-between">
-                <span>Slippage</span>
-                <span>Est: 0% / Max: 8.00%</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Fees</span>
-                <span>0.0700% / 0.0400%</span>
-              </div>
-            </div>
 
-            {/* Deposit / Withdraw buttons */}
-            <div className="mt-2 space-y-2">
-              <button className="w-full py-2 rounded bg-[#0d1d26] text-sm border border-[#11343f] hover:bg-[#102532]">
-                Deposit
+              {/* Connect button */}
+              <button className="w-full py-2 rounded-lg bg-teal-400 text-black text-[12px] hover:bg-teal-300 mt-[200px]">
+                Connect
               </button>
-              <div className="flex gap-2">
-                <button className="flex-1 py-2 rounded bg-[#0d1d26] text-sm border border-[#11343f] hover:bg-[#102532]">
-                  Perps ↔ Spot
+
+              {/* Order value / fees */}
+              <div className="space-y-1 text-[11px] text-[#8b9bb5] border-t border-[#111827] pt-3">
+                <div className="flex justify-between">
+                  <span>Order Value</span>
+                  <span className="text-white">N/A</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Slippage</span>
+                  <span>Est: 0% / Max: 8.00%</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Fees</span>
+                  <span>0.0700% / 0.0400%</span>
+                </div>
+              </div>
+
+              {/* Deposit / Withdraw buttons */}
+              <div className="mt-2 space-y-2">
+                <button className="w-full py-2 rounded bg-[#0d1d26] text-sm border border-[#11343f] hover:bg-[#102532]">
+                  Deposit
                 </button>
-                <button className="flex-1 py-2 rounded bg-[#0d1d26] text-sm border border-[#11343f] hover:bg-[#102532]">
-                  Withdraw
-                </button>
+                <div className="flex gap-2">
+                  <button className="flex-1 py-2 rounded bg-[#0d1d26] text-sm border border-[#11343f] hover:bg-[#102532]">
+                    Perps ↔ Spot
+                  </button>
+                  <button className="flex-1 py-2 rounded bg-[#0d1d26] text-sm border border-[#11343f] hover:bg-[#102532]">
+                    Withdraw
+                  </button>
+                </div>
+              </div>
+
+              {/* Account equity card */}
+              <div className="mt-3 border-t border-[#111827] pt-3 text-[11px] text-[#8b9bb5] space-y-1">
+                <div className="font-semibold text-sm text-white">
+                  Account Equity
+                </div>
+                <div className="flex justify-between">
+                  <span>Spot</span>
+                  <span>$0.00</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Perps</span>
+                  <span>$0.00</span>
+                </div>
+
+                <div className="mt-2 font-semibold text-sm text-white">
+                  Perps Overview
+                </div>
+                <div className="flex justify-between">
+                  <span>Balance</span>
+                  <span>$0.00</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Unrealized PNL</span>
+                  <span>$0.00</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Cross Margin Ratio</span>
+                  <span>0.00%</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Maintenance Margin</span>
+                  <span>$0.00</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Cross Account Leverage</span>
+                  <span>0.00x</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+      <div className="all_trade_mobile min-h-screen w-full bg-[#0B1518] text-white flex flex-col items-center">
+        <Header session={session} />
+        {/* Fixed-width card so desktop look doesn't get affected if someone opens it on big screens via dev tools */}
+        <div className="w-[355px] max-w-[355px] min-w-[100%] bg-[#0F1A1F] border border-[#142028] rounded-lg overflow-hidden shadow-md my-2">
+          {/* Header: Pair + Price + Tabs */}
+          <div className="px-3 py-3 border-b border-[#142028]">
+            <div className="flex items-center gap-2 text-xs">
+              <span className="px-2 py-0.5 rounded bg-[#071720] text-teal-300 border border-[#11343f]">
+                Spot
+              </span>
+              <span className="text-sm font-semibold">HYPE/USDC</span>
+            </div>
+
+            <div className="mt-2 flex items-end justify-between">
+              <div className="flex items-baseline gap-3">
+                <span
+                  className={`text-xl font-semibold ${
+                    price.isUp ? "text-emerald-400" : "text-teal-300"
+                  }`}
+                >
+                  {price.last}
+                </span>
+                <span
+                  className={`text-sm ${
+                    price.isUp ? "text-emerald-400" : "text-rose-400"
+                  }`}
+                >
+                  {price.changeAbs} / {price.changePct}
+                </span>
               </div>
             </div>
 
-            {/* Account equity card */}
-            <div className="mt-3 border-t border-[#111827] pt-3 text-[11px] text-[#8b9bb5] space-y-1">
-              <div className="font-semibold text-sm text-white">
-                Account Equity
+            <div className="mt-3 flex items-center gap-6 text-[12px] justify-between">
+              {(["Chart", "Order Book", "Trades"] as TopTab[]).map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setTopTab(t)}
+                  className={`pb-2 transition border-b-2 ${
+                    topTab === t
+                      ? "border-teal-400 text-teal-300"
+                      : "border-transparent text-[#8b9bb5] hover:text-white"
+                  }`}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Content area */}
+          <div className="bg-[#0F1A1F]">
+            {topTab === "Chart" && (
+              <>
+                {/* Mini toolbar (visual) */}
+                <div className="flex items-center gap-3 px-3 py-2 text-[12px] text-[#cdd5db] border-b border-[#142028]">
+                  <div className="flex items-center gap-2">
+                    <button className="px-2 py-1 rounded bg-[#162027] border border-[#1c2a33]">
+                      5m
+                    </button>
+                    <button className="px-2 py-1 rounded hover:bg-[#162027]">
+                      1h
+                    </button>
+                    <button className="px-2 py-1 rounded hover:bg-[#162027]">
+                      1D
+                    </button>
+                  </div>
+                  <div className="ml-auto flex items-center gap-3">
+                    <span className="text-[#93a4ad]">Indicators</span>
+                    <span className="text-[#93a4ad]">⋮</span>
+                  </div>
+                </div>
+
+                {/* TradingView chart (left toolbar on, dark, with volume) */}
+                {/* <div className="px-2 pt-2"> */}
+                <div className="px-2 pt-2">
+                  <div className="h-[420px]">
+                    <TradingViewChartt
+                      symbol="HYPEUSDC"
+                      interval="60"
+                      height={420}
+                    />
+                  </div>
+                </div>
+                {/* </div> */}
+
+                {/* Bottom info bar */}
+                <div className="px-3 py-2 flex items-center justify-between text-[12px] text-[#93a4ad] border-t border-[#142028]">
+                  <span>Date Range</span>
+                  <span>20:08:29 (UTC+5)</span>
+                  <span className="flex items-center gap-1">
+                    log <span className="text-[#7ce0d5]">auto</span>
+                  </span>
+                </div>
+              </>
+            )}
+
+            {topTab === "Order Book" && (
+              <div className="px-3 py-3">
+                <div className="flex justify-between text-[11px] text-[#8b9bb5] pb-2">
+                  <span>Price</span>
+                  <span className="text-right">Size (HYPE)</span>
+                  <span className="text-right">Total (HYPE)</span>
+                </div>
+
+                {/* Sell side */}
+                <div className="text-xs">
+                  {sellOrders.map((row, idx) => (
+                    <div
+                      key={`s-${idx}`}
+                      className="relative flex justify-between py-[4px]"
+                    >
+                      <div
+                        className="absolute inset-y-0 right-0 bg-red-500/15"
+                        style={{ width: `${row.depth}%` }}
+                      />
+                      <span className="text-rose-400 z-10">{row.price}</span>
+                      <span className="text-right z-10">{row.size}</span>
+                      <span className="text-right z-10">{row.total}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Spread */}
+                <div className="mt-2 mb-2 px-2 py-1 rounded bg-[#07121b] text-[11px] text-[#8b9bb5] flex justify-between">
+                  <span>Spread</span>
+                  <span>0.000</span>
+                  <span>0.022%</span>
+                </div>
+
+                {/* Buy side */}
+                <div className="text-xs">
+                  {buyOrders.map((row, idx) => (
+                    <div
+                      key={`b-${idx}`}
+                      className="relative flex justify-between py-[4px]"
+                    >
+                      <div
+                        className="absolute inset-y-0 left-0 bg-green-500/15"
+                        style={{ width: `${row.depth}%` }}
+                      />
+                      <span className="text-emerald-400 z-10">{row.price}</span>
+                      <span className="text-right z-10">{row.size}</span>
+                      <span className="text-right z-10">{row.total}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span>Spot</span>
-                <span>$0.00</span>
+            )}
+
+            {topTab === "Trades" && (
+              <div className="px-3 py-3">
+                <div className="grid grid-cols-3 text-[11px] text-[#8b9bb5] pb-2">
+                  <span>Time</span>
+                  <span className="text-right">Price</span>
+                  <span className="text-right">Size</span>
+                </div>
+                <div className="space-y-1 text-xs">
+                  {recentTrades.map((t, i) => (
+                    <div key={i} className="grid grid-cols-3">
+                      <span className="text-[#cdd5db]">{t.time}</span>
+                      <span
+                        className={`text-right ${
+                          t.side === "buy"
+                            ? "text-emerald-400"
+                            : "text-rose-400"
+                        }`}
+                      >
+                        {t.price}
+                      </span>
+                      <span className="text-right text-[#cdd5db]">
+                        {t.size}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span>Perps</span>
-                <span>$0.00</span>
+            )}
+
+            {/* Bottom section (Balances / Positions / etc.) */}
+            <div className="border-t border-[#142028]">
+              {/* Tabs */}
+              <div className="px-3 overflow-x-auto">
+                <div className="flex gap-4 text-[12px]">
+                  {(
+                    [
+                      "Balances",
+                      "Positions",
+                      "Open Orders",
+                      "TWAP",
+                      "Trade History",
+                      "Funding History",
+                      "Order History",
+                    ] as BottomTab[]
+                  ).map((t) => (
+                    <button
+                      key={t}
+                      onClick={() => setBottomTab(t)}
+                      className={`py-2 border-b-2 whitespace-nowrap ${
+                        bottomTab === t
+                          ? "border-teal-400 text-teal-300"
+                          : "border-transparent text-[#8b9bb5]"
+                      }`}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              <div className="mt-2 font-semibold text-sm text-white">
-                Perps Overview
+              {/* Filter row */}
+              <div className="px-3 py-2 flex items-center justify-between text-[12px] text-[#8b9bb5] border-t border-[#142028]">
+                <button className="flex items-center gap-1 hover:text-white">
+                  <SortAsc className="w-4 h-4" />
+                  Sort by
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="accent-teal-400 h-3 w-3"
+                    checked={hideSmall}
+                    onChange={() => setHideSmall((v) => !v)}
+                  />
+                  <span>Hide Small Balances</span>
+                </label>
               </div>
-              <div className="flex justify-between">
-                <span>Balance</span>
-                <span>$0.00</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Unrealized PNL</span>
-                <span>$0.00</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Cross Margin Ratio</span>
-                <span>0.00%</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Maintenance Margin</span>
-                <span>$0.00</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Cross Account Leverage</span>
-                <span>0.00x</span>
+
+              {/* Tab content */}
+              <div className="px-3 py-8 text-sm text-[#8b9bb5]">
+                {bottomTab === "Balances"
+                  ? "No balances yet"
+                  : `No ${bottomTab.toLowerCase()} yet`}
               </div>
             </div>
           </div>
         </div>
-      </main>
-      <Footer />
-    </div>
+
+        {/* Sticky bottom nav (like the screenshot) */}
+        <nav className="fixed bottom-0 inset-x-0 bg-[#0F1A1F] border-t border-[#142028]">
+          <div className="mx-auto w-[355px] max-w-[355px] min-w-[355px] flex items-center justify-around py-2">
+            <Link href={"/"}>
+            <button className="flex flex-col items-center gap-1 text-[11px] text-[#cdd5db]">
+              <BarChart3 className="w-5 h-5 text-[#7ce0d5]" />
+              Markets
+            </button>
+            </Link>
+
+            <Link href={"/tradeTab"}>
+              <button
+                onClick={() => setIsTradeOpen(true)}
+                className="flex flex-col items-center gap-1 text-[11px] text-[#cdd5db]"
+              >
+                <Wallet2 className="w-5 h-5 text-[#7ce0d5]" />
+                Trade
+              </button>
+            </Link>
+
+<Link href={"/AccountTab"}>
+            <button className="flex flex-col items-center gap-1 text-[11px] text-[#cdd5db]">
+              <UserCircle2 className="w-5 h-5 text-[#7ce0d5]" />
+              Account
+            </button>
+            </Link>
+          </div>
+        </nav>
+
+      </div>
+    </>
   );
 };
 
 export default Chart;
+
+// "use client";
+
+// import React, { useEffect, useMemo, useRef, useState } from "react";
+// import {
+//   BarChart3,
+//   Wallet2,
+//   UserCircle2,
+//   SortAsc,
+//   ChevronDown,
+// } from "lucide-react";
+
+// /**
+//  * Lightweight TradingView wrapper in the SAME FILE for easy copy/paste
+//  */
+// declare global {
+//   interface Window {
+//     TradingView: any;
+//   }
+// }
+
+// function TradingViewChart({
+//   symbol = "HYPEUSDC",
+//   interval = "60",
+//   height = 420,
+// }: {
+//   symbol?: string;
+//   interval?: string;
+//   height?: number;
+// }) {
+//   const container = useRef<HTMLDivElement>(null);
+
+//   useEffect(() => {
+//     let script: HTMLScriptElement | null = null;
+
+//     const init = () => {
+//       if (!container.current || !window.TradingView) return;
+
+//       // Clear container to avoid duplicates on re-render
+//       container.current.innerHTML = "";
+
+//       new window.TradingView.widget({
+//         autosize: true,
+//         symbol,
+//         interval, // "60" => 1h like screenshot
+//         timezone: "Etc/UTC",
+//         theme: "dark",
+//         style: "1",
+//         locale: "en",
+//         toolbar_bg: "#0F1A1F",
+//         hide_top_toolbar: false,
+//         hide_side_toolbar: false, // left toolbar visible (screenshot)
+//         withdateranges: true,
+//         allow_symbol_change: false,
+//         container_id: container.current.id,
+//         studies: ["Volume@tv-basicstudies"],
+//         backgroundColor: "#0F1A1F",
+//         gridColor: "rgba(255,255,255,0.08)",
+//         loading_screen: { backgroundColor: "#0F1A1F", foregroundColor: "#0F1A1F" },
+//         drawings_access: { type: "black", tools: [{ name: "Regression Trend" }] },
+//         disabled_features: [
+//           "header_settings",
+//           "header_compare",
+//           "header_fullscreen_button",
+//           "header_saveload",
+//           "save_chart_properties_to_local_storage",
+//           "legend_widget",
+//           "header_undo_redo",
+//         ],
+//         enabled_features: ["items_favoriting"],
+//       });
+//     };
+
+//     if (!window.TradingView) {
+//       script = document.createElement("script");
+//       script.src = "https://s3.tradingview.com/tv.js";
+//       script.async = true;
+//       script.onload = init;
+//       document.body.appendChild(script);
+//     } else {
+//       init();
+//     }
+
+//     return () => {
+//       if (script) script.onload = null;
+//     };
+//   }, [symbol, interval]);
+
+//   return (
+//     <div
+//       id="tv_chart_container_mobile"
+//       ref={container}
+//       style={{ width: "100%", height }}
+//       className="rounded-md overflow-hidden"
+//     />
+//   );
+// }
+
+// /**
+//  * DATA MOCKS (Order book + Trades)
+//  */
+// const sellOrders = [
+//   { price: "32.560", size: "0.37", total: "1,223.41", depth: 85 },
+//   { price: "32.557", size: "0.37", total: "1,151.04", depth: 80 },
+//   { price: "32.555", size: "0.37", total: "1,114.54", depth: 75 },
+//   { price: "32.553", size: "0.37", total: "1,077.99", depth: 70 },
+//   { price: "32.551", size: "0.37", total: "1,041.44", depth: 65 },
+// ];
+
+// const buyOrders = [
+//   { price: "32.549", size: "0.37", total: "0.37", depth: 20 },
+//   { price: "32.547", size: "0.37", total: "104.85", depth: 35 },
+//   { price: "32.545", size: "0.37", total: "824.14", depth: 50 },
+//   { price: "32.543", size: "0.37", total: "1,709.11", depth: 70 },
+//   { price: "32.540", size: "0.37", total: "2,052.91", depth: 85 },
+// ];
+
+// const recentTrades = [
+//   { time: "20:08:21", price: "32.520", size: "0.42", side: "sell" as const },
+//   { time: "20:08:17", price: "32.535", size: "1.02", side: "buy" as const },
+//   { time: "20:08:11", price: "32.500", size: "0.13", side: "sell" as const },
+//   { time: "20:08:08", price: "32.495", size: "0.77", side: "sell" as const },
+// ];
+
+// type TopTab = "Chart" | "Order Book" | "Trades";
+// type BottomTab =
+//   | "Balances"
+//   | "Positions"
+//   | "Open Orders"
+//   | "TWAP"
+//   | "Trade History"
+//   | "Funding History"
+//   | "Order History";
+
+// /**
+//  * MAIN MOBILE EXCHANGE COMPONENT
+//  * Hidden on desktop (lg:hidden) so your desktop stays unchanged.
+//  */
+// export default function MobileExchange() {
+//   const [topTab, setTopTab] = useState<TopTab>("Chart");
+//   const [bottomTab, setBottomTab] = useState<BottomTab>("Balances");
+//   const [hideSmall, setHideSmall] = useState(true);
+
+//   const price = useMemo(
+//     () => ({
+//       last: "32.500",
+//       changeAbs: "-0.569",
+//       changePct: "-1.72%",
+//       isUp: false,
+//     }),
+//     []
+//   );
+
+//   return (
+//     <div className="lg:hidden min-h-screen w-full bg-[#0B1518] text-white flex flex-col items-center">
+//       {/* Fixed-width card so desktop look doesn't get affected if someone opens it on big screens via dev tools */}
+//       <div className="w-[355px] max-w-[355px] min-w-[355px] bg-[#0F1A1F] border border-[#142028] rounded-lg overflow-hidden shadow-md my-2">
+//         {/* Header: Pair + Price + Tabs */}
+//         <div className="px-3 py-3 border-b border-[#142028]">
+//           <div className="flex items-center gap-2 text-xs">
+//             <span className="px-2 py-0.5 rounded bg-[#071720] text-teal-300 border border-[#11343f]">
+//               Spot
+//             </span>
+//             <span className="text-sm font-semibold">HYPE/USDC</span>
+//           </div>
+
+//           <div className="mt-2 flex items-end justify-between">
+//             <div className="flex items-baseline gap-3">
+//               <span
+//                 className={`text-xl font-semibold ${
+//                   price.isUp ? "text-emerald-400" : "text-teal-300"
+//                 }`}
+//               >
+//                 {price.last}
+//               </span>
+//               <span
+//                 className={`text-sm ${
+//                   price.isUp ? "text-emerald-400" : "text-rose-400"
+//                 }`}
+//               >
+//                 {price.changeAbs} / {price.changePct}
+//               </span>
+//             </div>
+//           </div>
+
+//           <div className="mt-3 flex items-center gap-6 text-[12px]">
+//             {(["Chart", "Order Book", "Trades"] as TopTab[]).map((t) => (
+//               <button
+//                 key={t}
+//                 onClick={() => setTopTab(t)}
+//                 className={`pb-2 transition border-b-2 ${
+//                   topTab === t
+//                     ? "border-teal-400 text-teal-300"
+//                     : "border-transparent text-[#8b9bb5] hover:text-white"
+//                 }`}
+//               >
+//                 {t}
+//               </button>
+//             ))}
+//           </div>
+//         </div>
+
+//         {/* Content area */}
+//         <div className="bg-[#0F1A1F]">
+//           {topTab === "Chart" && (
+//             <>
+//               {/* Mini toolbar (visual) */}
+//               <div className="flex items-center gap-3 px-3 py-2 text-[12px] text-[#cdd5db] border-b border-[#142028]">
+//                 <div className="flex items-center gap-2">
+//                   <button className="px-2 py-1 rounded bg-[#162027] border border-[#1c2a33]">
+//                     5m
+//                   </button>
+//                   <button className="px-2 py-1 rounded hover:bg-[#162027]">
+//                     1h
+//                   </button>
+//                   <button className="px-2 py-1 rounded hover:bg-[#162027]">
+//                     1D
+//                   </button>
+//                 </div>
+//                 <div className="ml-auto flex items-center gap-3">
+//                   <span className="text-[#93a4ad]">Indicators</span>
+//                   <span className="text-[#93a4ad]">⋮</span>
+//                 </div>
+//               </div>
+
+//               {/* TradingView chart (left toolbar on, dark, with volume) */}
+//               <div className="px-2 pt-2">
+//                 <div className="h-[420px]">
+//                   <TradingViewChart symbol="HYPEUSDC" interval="60" height={420} />
+//                 </div>
+//               </div>
+
+//               {/* Bottom info bar */}
+//               <div className="px-3 py-2 flex items-center justify-between text-[12px] text-[#93a4ad] border-t border-[#142028]">
+//                 <span>Date Range</span>
+//                 <span>20:08:29 (UTC+5)</span>
+//                 <span className="flex items-center gap-1">
+//                   log <span className="text-[#7ce0d5]">auto</span>
+//                 </span>
+//               </div>
+//             </>
+//           )}
+
+//           {topTab === "Order Book" && (
+//             <div className="px-3 py-3">
+//               <div className="flex justify-between text-[11px] text-[#8b9bb5] pb-2">
+//                 <span>Price</span>
+//                 <span className="text-right">Size (HYPE)</span>
+//                 <span className="text-right">Total (HYPE)</span>
+//               </div>
+
+//               {/* Sell side */}
+//               <div className="text-xs">
+//                 {sellOrders.map((row, idx) => (
+//                   <div
+//                     key={`s-${idx}`}
+//                     className="relative flex justify-between py-[4px]"
+//                   >
+//                     <div
+//                       className="absolute inset-y-0 right-0 bg-red-500/15"
+//                       style={{ width: `${row.depth}%` }}
+//                     />
+//                     <span className="text-rose-400 z-10">{row.price}</span>
+//                     <span className="text-right z-10">{row.size}</span>
+//                     <span className="text-right z-10">{row.total}</span>
+//                   </div>
+//                 ))}
+//               </div>
+
+//               {/* Spread */}
+//               <div className="mt-2 mb-2 px-2 py-1 rounded bg-[#07121b] text-[11px] text-[#8b9bb5] flex justify-between">
+//                 <span>Spread</span>
+//                 <span>0.000</span>
+//                 <span>0.022%</span>
+//               </div>
+
+//               {/* Buy side */}
+//               <div className="text-xs">
+//                 {buyOrders.map((row, idx) => (
+//                   <div
+//                     key={`b-${idx}`}
+//                     className="relative flex justify-between py-[4px]"
+//                   >
+//                     <div
+//                       className="absolute inset-y-0 left-0 bg-green-500/15"
+//                       style={{ width: `${row.depth}%` }}
+//                     />
+//                     <span className="text-emerald-400 z-10">{row.price}</span>
+//                     <span className="text-right z-10">{row.size}</span>
+//                     <span className="text-right z-10">{row.total}</span>
+//                   </div>
+//                 ))}
+//               </div>
+//             </div>
+//           )}
+
+//           {topTab === "Trades" && (
+//             <div className="px-3 py-3">
+//               <div className="grid grid-cols-3 text-[11px] text-[#8b9bb5] pb-2">
+//                 <span>Time</span>
+//                 <span className="text-right">Price</span>
+//                 <span className="text-right">Size</span>
+//               </div>
+//               <div className="space-y-1 text-xs">
+//                 {recentTrades.map((t, i) => (
+//                   <div key={i} className="grid grid-cols-3">
+//                     <span className="text-[#cdd5db]">{t.time}</span>
+//                     <span
+//                       className={`text-right ${
+//                         t.side === "buy" ? "text-emerald-400" : "text-rose-400"
+//                       }`}
+//                     >
+//                       {t.price}
+//                     </span>
+//                     <span className="text-right text-[#cdd5db]">{t.size}</span>
+//                   </div>
+//                 ))}
+//               </div>
+//             </div>
+//           )}
+
+//           {/* Bottom section (Balances / Positions / etc.) */}
+//           <div className="border-t border-[#142028]">
+//             {/* Tabs */}
+//             <div className="px-3 overflow-x-auto">
+//               <div className="flex gap-4 text-[12px]">
+//                 {(
+//                   [
+//                     "Balances",
+//                     "Positions",
+//                     "Open Orders",
+//                     "TWAP",
+//                     "Trade History",
+//                     "Funding History",
+//                     "Order History",
+//                   ] as BottomTab[]
+//                 ).map((t) => (
+//                   <button
+//                     key={t}
+//                     onClick={() => setBottomTab(t)}
+//                     className={`py-2 border-b-2 whitespace-nowrap ${
+//                       bottomTab === t
+//                         ? "border-teal-400 text-teal-300"
+//                         : "border-transparent text-[#8b9bb5]"
+//                     }`}
+//                   >
+//                     {t}
+//                   </button>
+//                 ))}
+//               </div>
+//             </div>
+
+//             {/* Filter row */}
+//             <div className="px-3 py-2 flex items-center justify-between text-[12px] text-[#8b9bb5] border-t border-[#142028]">
+//               <button className="flex items-center gap-1 hover:text-white">
+//                 <SortAsc className="w-4 h-4" />
+//                 Sort by
+//                 <ChevronDown className="w-4 h-4" />
+//               </button>
+
+//               <label className="flex items-center gap-2 cursor-pointer">
+//                 <input
+//                   type="checkbox"
+//                   className="accent-teal-400 h-3 w-3"
+//                   checked={hideSmall}
+//                   onChange={() => setHideSmall((v) => !v)}
+//                 />
+//                 <span>Hide Small Balances</span>
+//               </label>
+//             </div>
+
+//             {/* Tab content */}
+//             <div className="px-3 py-8 text-sm text-[#8b9bb5]">
+//               {bottomTab === "Balances" ? "No balances yet" : `No ${bottomTab.toLowerCase()} yet`}
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* Sticky bottom nav (like the screenshot) */}
+//       <nav className="fixed bottom-0 inset-x-0 bg-[#0F1A1F] border-t border-[#142028]">
+//         <div className="mx-auto w-[355px] max-w-[355px] min-w-[355px] flex items-center justify-around py-2">
+//           <button className="flex flex-col items-center gap-1 text-[11px] text-[#cdd5db]">
+//             <BarChart3 className="w-5 h-5 text-[#7ce0d5]" />
+//             Markets
+//           </button>
+//           <button className="flex flex-col items-center gap-1 text-[11px] text-[#cdd5db]">
+//             <Wallet2 className="w-5 h-5 text-[#7ce0d5]" />
+//             Trade
+//           </button>
+//           <button className="flex flex-col items-center gap-1 text-[11px] text-[#cdd5db]">
+//             <UserCircle2 className="w-5 h-5 text-[#7ce0d5]" />
+//             Account
+//           </button>
+//         </div>
+//       </nav>
+//     </div>
+//   );
+// }

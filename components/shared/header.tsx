@@ -635,6 +635,7 @@ function Logo({ theme, className }: { theme: string; className?: string }) {
   return (
     <div className={className}>
       {theme === "dark" ? (
+        <>
         <svg
           width="115"
           height="32"
@@ -642,6 +643,7 @@ function Logo({ theme, className }: { theme: string; className?: string }) {
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
           style={{ transform: "translateY(2px)" }}
+          // className="hidden md:block"
         >
           <g clipPath="url(#clip0_623_29714)">
             <path
@@ -699,6 +701,7 @@ function Logo({ theme, className }: { theme: string; className?: string }) {
             </clipPath>
           </defs>
         </svg>
+        </>
       ) : (
         <svg
           width="115"
@@ -825,6 +828,14 @@ export default function Header({ session }: { session: Session | null }) {
       <div className="header-container flex items-center justify-between dark:border-gray-800">
         {/* LEFT: Logo + Desktop Nav */}
         <div className="flex items-center gap-[18px]">
+          
+          {/* Mobile Menu Button */}
+          <button
+            onClick={toggleMenu}
+            className="md:hidden inline-flex items-center justify-center p-2 rounded-lg border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+          >
+            {menuOpen ? <X size={15} /> : <Menu size={15} />}
+          </button>
           <Logo theme={theme} />
 
           {/* Desktop navigation */}
@@ -1039,20 +1050,12 @@ export default function Header({ session }: { session: Session | null }) {
               </div>
             )}
           </div>
-
-          {/* Mobile Menu Button */}
-          <button
-            onClick={toggleMenu}
-            className="md:hidden inline-flex items-center justify-center p-2 rounded-lg border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-          >
-            {menuOpen ? <X size={15} /> : <Menu size={15} />}
-          </button>
         </div>
       </div>
 
       {/* CONNECT MODAL */}
       {connectOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md">
+        <div className="fixed inset-0 z-[50px] flex items-center justify-center bg-black/70 backdrop-blur-md">
           <div className="relative w-[380px] rounded-2xl bg-[#0b141b] p-6 shadow-2xl border border-white/10">
             <button
               onClick={() => setConnectOpen(false)}
@@ -1109,18 +1112,18 @@ export default function Header({ session }: { session: Session | null }) {
 
       {/* MOBILE SIDEBAR (LEFT SIDE) */}
       {menuOpen && (
-        <div className="fixed inset-0 z-40 flex md:hidden">
+        <div className="fixed inset-0 z-[999] flex md:hidden">
           {/* LEFT: Sidebar panel */}
-          <div className="w-64 max-w-[70%] bg-[#020910] text-white h-full shadow-xl flex flex-col">
+          <div className="w-64 max-w-[55%] bg-[#020910] text-white h-full shadow-xl flex flex-col z-[50px]">
             {/* Sidebar header (logo + close) */}
-            <div className="flex items-center justify-between px-4 py-4 border-b border-white/10">
+            <div className="flex items-center justify-between px-4 py-4 border-b border-white/10 z-40">
               <Logo theme={theme} className="scale-75 origin-left" />
-              <button
+              {/* <button
                 onClick={toggleMenu}
                 className="p-1 rounded-md hover:bg-white/10"
               >
                 <X size={20} />
-              </button>
+              </button> */}
             </div>
 
             {/* Sidebar nav items */}

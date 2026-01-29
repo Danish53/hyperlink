@@ -10923,6 +10923,12 @@ body.light-theme .crypto-options button {
   }
 }
 
+.all_trade_mobile{
+    display: none;
+  }
+  .all_trade_desk{
+    display: block;
+  }
 
 @media(max-width: 600px) {
   .navigation {
@@ -10933,6 +10939,12 @@ body.light-theme .crypto-options button {
   }
   .header{
     padding: 10px !important;
+  }
+  .all_trade_mobile{
+    display: block;
+  }
+  .all_trade_desk{
+    display: none;
   }
 }
 
