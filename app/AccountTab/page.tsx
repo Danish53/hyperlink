@@ -6,6 +6,8 @@ import MarketsModal from "../../components/MarketsDropdown";
 import { BarChart3, ChevronDown, Search, SortAsc, UserCircle2, Wallet2, X } from "lucide-react";
 import Header from "@/components/shared/header";
 import Link from "next/link";
+import { auth } from '../../lib/auth';
+import { headers } from "next/headers";
 
 type OrderBookTab = "orderbook" | "trades";
 type BottomTab =
@@ -184,6 +186,10 @@ const buyOrders = [
   { price: "27.531", size: "0.37", total: "2,052.91", depth: 85 },
   { price: "27.529", size: "0.37", total: "2,255.42", depth: 90 },
 ];
+
+const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
 const AccountTab = ({ session }: { session: any }) => {
   const [orderBookTab, setOrderBookTab] = useState<OrderBookTab>("orderbook");
