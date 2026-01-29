@@ -10410,7 +10410,7 @@ body {
 .deposit-container {
   display: grid;
   grid-template-columns: 1fr 3fr;
-  max-width: 1200px;
+  max-width: 1320px;
   margin: 0 auto;
   margin-top: 70px;
   padding: 20px;
@@ -10548,7 +10548,6 @@ body {
 }
 
 body.light-theme .deposit-container {
-
   color: #333;
 }
 
@@ -10935,4 +10934,13 @@ body.light-theme .crypto-options button {
   .header{
     padding: 10px !important;
   }
+}
+
+:root {
+  --tv-color-pane-background: #0f1a1f;
+}
+
+
+table, th, td, tr {
+  border: none !important;
 }

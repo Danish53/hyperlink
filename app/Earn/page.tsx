@@ -31,18 +31,18 @@ export default function EarnPage() {
       <Header session={null} />
 
       <div className="min-h-screen bg-[#01221b] text-[#eafffb] px-10 py-10 mt-8">
-        <div className="max-w-[1300px] mx-auto">
+        <div className="max-w-[1320px] mx-auto">
 
           {/* Header */}
           <div className="flex justify-between items-center mt-8">
-            <h1 className="text-3xl font-semibold">Earn</h1>
-            <button className="bg-[#2dd4bf] text-gray-900 px-4 py-2 rounded-md text-[12px]">
+            <h1 className="text-[34px] font-[400] text-white">Earn</h1>
+            <button className="bg-[#2dd4bf] text-gray-900 px-4 py-2 rounded-md text-[12px] h-[40px]">
               Supply
             </button>
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 gap-4 mb-4">
+          <div className="grid grid-cols-2 gap-4 mb-4" style={{gap: "10px", marginTop: "30px"}}>
             <Stat title="Your Health Factor" value="--" />
             <Stat title="Your Total Supplied" value="$0.00" />
             <Stat title="Your Total Borrowed" value="$0.00" />

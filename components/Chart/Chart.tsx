@@ -3671,14 +3671,14 @@ const Chart = ({ session }: { session: any }) => {
                 </svg>
               </div>
               {/* Pair header */}
-              <div className="px-4 py-3 bg-[#0F1A1F] mx-1 rounded-md">
-                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+              <div className="bg-[#0F1A1F] mx-1 rounded-md h-[63px] flex items-center whitespace-nowrap">
+                <div className="flex flex-col md:items-center md:justify-between">
+                  <div className="flex gap-[16px] sm:flex-row items-center sm:gap-[32px]">
                     {/* Pair + spot badge */}
                     <div className="flex items-center gap-1">
-                      <div className="relative inline-block">
+                      <div className="relative inline-block p-2">
                         <span
-                          className=" text-[20px] flex gap-2 items-center cursor-pointer"
+                          className="text-[16px] sm:text-[20px] line-[27px] flex gap-2 items-center cursor-pointer"
                           onClick={() => setMoreOpen((prev) => !prev)}
                         >
                           <svg
@@ -3726,7 +3726,7 @@ const Chart = ({ session }: { session: any }) => {
                           <div className="absolute left-0 mt-2 w-[800px] rounded-lg bg-white dark:bg-[#1B2429] border border-gray-300 dark:border-gray-700 shadow-lg z-40">
                             <div className="flex flex-col text-white">
                               {/* Search + Strict/All + Close */}
-                              <div className="flex  w-full items-center gap-3 px-4 py-3">
+                              <div className="flex w-full items-center gap-3 px-4 py-3">
                                 <div className="relative flex gap-2 items-center w-full">
                                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6b7280] z-40 hidden md:block" />
                                   <input
@@ -3806,8 +3806,8 @@ const Chart = ({ session }: { session: any }) => {
 
                               {/* Table */}
                               <div className="flex-1 overflow-auto">
-                                <table className="min-w-full text-[12px] px-3 w-full border-collapse border-0">
-                                  <thead className=" sticky top-0 z-10 border-b border-[#111827]">
+                                <table className="min-w-full text-[12px] px-3 w-full border-0 border-separate">
+                                  <thead className="sticky top-0 z-10">
                                     <tr className="text-[#9ca3af] text-[11px] font-[400] border-0">
                                       <th className="px-4 py-2 text-left font-normal ">
                                         Symbol
@@ -3837,7 +3837,7 @@ const Chart = ({ session }: { session: any }) => {
                                           row.highlight ? "" : ""
                                         }`}
                                       >
-                                        <td className="px-4 py-2 whitespace-nowrap">
+                                        <td className="px-2 py-1 whitespace-nowrap">
                                           <div className="flex items-center gap-2">
                                             <span className="text-yellow-400 text-sm">
                                               ★
@@ -3936,78 +3936,276 @@ const Chart = ({ session }: { session: any }) => {
                       </span>
                     </div>
 
-                    <div className="flex flex-wrap gap-x-3 gap-y-1 text-[10px] sm:text-[11px] text-[#8b9bb5]">
-                      <div className="flex flex-col min-w-[150px]">
-                        <span>Price</span>
-                        <span className="text-[12px] text-white">
-                          27.538{" "}
-                          <span className="text-teal-300  text-[11px] ml-1">
-                            +5.347 / +24.10%
+                    <div
+                      style={{
+                        overflowX: "scroll",
+                        scrollbarWidth: "none",
+                        display: "grid",
+                        gridTemplateColumns: "repeat(6, auto)",
+                        gap: "32px",
+                        alignItems: "center",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateRows: "1fr 1fr",
+                          gap: "4px",
+                        }}
+                      >
+                        <div>
+                          <div
+                            className="sc-pyfCe gKZuHd"
+                            style={{ display: "inline-block" }}
+                          >
+                            <p
+                              className="sc-bjfHbI bFBYgR underline noWrap"
+                              style={{
+                                color: "rgb(148, 158, 156)",
+                                display: "block",
+                                fontSize: "12px",
+                              }}
+                            >
+                              Price
+                            </p>
+                          </div>
+                        </div>
+                        <div
+                          className="sc-bjfHbI bFBYgR noWrap monospaced"
+                          style={{
+                            color: "rgb(246, 254, 253)",
+                            fontSize: "12px",
+                            display: "block",
+                          }}
+                        >
+                          <span
+                            style={{
+                              animation:
+                                "1.8s ease 0s 1 normal none running use-color-change05053352619754738",
+                            }}
+                          >
+                            {" "}
+                            32.659{" "}
                           </span>
-                        </span>
+                        </div>
                       </div>
-
-                      <div className="flex flex-col min-w-[145px]">
-                        <span>24H Volume</span>
-                        <span className="text-[12px] text-white">
-                          124,003,410.43 USDC
-                        </span>
-                      </div>
-
-                      <div className="flex flex-col min-w-[130px]">
-                        <span>Market Cap</span>
-                        <span className="text-[12px] text-white">
-                          8,293,568,171 USDC
-                        </span>
-                      </div>
-
-                      <div className="flex flex-col min-w-[140px] max-w-[150px]">
-                        <span>Contract</span>
-                        <span className="text-[11px] text-[#8b9bb5] truncate flex gap-1 items-center">
-                          0x0d01...11ec
-                          <svg
-                            width="14"
-                            height="14"
-                            focusable="false"
-                            aria-hidden="true"
-                            viewBox="-2 -2 16 16"
-                            className="sc-eDvSVe KHlvw"
-                            style={{ marginBottom: "-2.4px" }}
+                      <div
+                        className="sc-fEXmlR ejmSgi"
+                        style={{
+                          display: "grid",
+                          gridTemplateRows: "1fr 1fr",
+                          gap: "4px",
+                        }}
+                      >
+                        <div>
+                          <div
+                            className="sc-bjfHbI bFBYgR noWrap"
+                            style={{
+                              color: "rgb(148, 158, 156)",
+                              display: "block",
+                              fontSize: "12px",
+                            }}
                           >
-                            <path
-                              d="M2.16649 1C1.52217 1 0.999851 1.52233 0.999851 2.16667V9.83333C0.999851 10.4777 1.52217 11 2.16649 11H9.83294C10.4773 11 10.9996 10.4777 10.9996 9.83333V7.16667C10.9996 6.89053 11.2235 6.66667 11.4996 6.66667C11.7757 6.66667 11.9995 6.89053 11.9995 7.16667V9.83333C11.9995 11.0299 11.0295 12 9.83294 12H2.16649C0.969905 12 -0.00012207 11.0299 -0.00012207 9.83333V2.16667C-0.00012207 0.970047 0.969905 0 2.16649 0H4.83308C5.10921 0 5.33308 0.22386 5.33308 0.5C5.33308 0.77614 5.10921 1 4.83308 1H2.16649ZM6.66634 0.5C6.66634 0.22386 6.89021 0 7.16634 0H11.4999C11.776 0 11.9999 0.22386 11.9999 0.5V4.83333C11.9999 5.10947 11.776 5.33333 11.4999 5.33333C11.2237 5.33333 10.9999 5.10947 10.9999 4.83333V1.70716L7.51988 5.18693C7.32461 5.38213 7.00808 5.38213 6.81281 5.18687C6.61755 4.9916 6.61755 4.675 6.81281 4.47976L10.2929 1H7.16634C6.89021 1 6.66634 0.77614 6.66634 0.5Z"
-                              fill="#50D2C1"
-                            ></path>
-                          </svg>
-                          <svg
-                            width="14"
-                            height="14"
-                            focusable="false"
-                            aria-hidden="true"
-                            viewBox="0 -960 960 900"
-                            className="sc-eDvSVe ghLAkI"
+                            24H Change
+                          </div>
+                        </div>
+                        <div
+                          className="sc-bjfHbI bFBYgR noWrap monospaced"
+                          style={{
+                            color: "rgb(246, 254, 253)",
+                            fontSize: "12px",
+                            display: "block",
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontVariantNumeric: "tabular-nums lining-nums",
+                              color: "rgb(237, 112, 136)",
+                            }}
                           >
-                            <path
-                              d="M240-160q-66 0-113-47T80-320v-320q0-66 47-113t113-47h480q66 0 113 47t47 113v320q0 66-47 113t-113 47H240Zm0-480h480q22 0 42 5t38 16v-21q0-33-23.5-56.5T720-720H240q-33 0-56.5 23.5T160-640v21q18-11 38-16t42-5Zm-74 130 445 108q9 2 18 0t17-8l139-116q-11-15-28-24.5t-37-9.5H240q-26 0-45.5 13.5T166-510Z"
-                              fill="#50D2C1"
-                              className="sc-bcXHqe iaMRsW"
-                            ></path>
-                          </svg>
-                        </span>
+                            <span>-0.849</span> / <span>-2.53%</span>
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        className="sc-fEXmlR ejmSgi"
+                        style={{
+                          display: "grid",
+                          gridTemplateRows: "1fr 1fr",
+                          gap: "4px",
+                        }}
+                      >
+                        <div>
+                          <div
+                            className="sc-bjfHbI bFBYgR noWrap"
+                            style={{
+                              color: "rgb(148, 158, 156)",
+                              display: "block",
+                              fontSize: "12px",
+                            }}
+                          >
+                            24H Volume
+                          </div>
+                        </div>
+                        <div
+                          className="sc-bjfHbI bFBYgR noWrap monospaced"
+                          style={{
+                            color: "rgb(246, 254, 253)",
+                            fontSize: "12px",
+                            display: "block",
+                          }}
+                        >
+                          <span>
+                            <div
+                              className="sc-pyfCe gKZuHd"
+                              style={{ display: "inline-block" }}
+                            >
+                              179,841,161.50 USDC
+                            </div>
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        className="sc-fEXmlR ejmSgi"
+                        style={{
+                          display: "grid",
+                          gridTemplateRows: "1fr 1fr",
+                          gap: "4px",
+                        }}
+                      >
+                        <div>
+                          <div
+                            className="sc-bjfHbI bFBYgR noWrap"
+                            style={{
+                              color: "rgb(148, 158, 156)",
+                              display: "block",
+                              fontSize: "12px",
+                            }}
+                          >
+                            Market Cap
+                          </div>
+                        </div>
+                        <div
+                          className="sc-bjfHbI bFBYgR noWrap monospaced"
+                          style={{
+                            color: "rgb(246, 254, 253)",
+                            fontSize: "12px",
+                            display: "block",
+                          }}
+                        >
+                          9,835,456,319 USDC
+                        </div>
+                      </div>
+                      <div
+                        className="sc-fEXmlR ejmSgi"
+                        style={{
+                          display: "grid",
+                          gridTemplateRows: "1fr 1fr",
+                          gap: "4px",
+                        }}
+                      >
+                        <div>
+                          <div
+                            className="sc-bjfHbI bFBYgR noWrap"
+                            style={{
+                              color: "rgb(148, 158, 156)",
+                              display: "block",
+                              fontSize: "12px",
+                            }}
+                          >
+                            Contract
+                          </div>
+                        </div>
+                        <div
+                          className="sc-bjfHbI bFBYgR noWrap monospaced"
+                          style={{
+                            color: "rgb(246, 254, 253)",
+                            fontSize: "12px",
+                            display: "block",
+                          }}
+                        >
+                          <div
+                            className=""
+                            style={{
+                              display: "flex",
+                              flexDirection: "row",
+                              gap: "8px",
+                              alignItems: "center",
+                            }}
+                          >
+                            0x0d01...11ec
+                            <div
+                              className=""
+                              style={{
+                                display: "flex",
+                                flexDirection: "row",
+                                gap: "8px",
+                                alignItems: "center",
+                              }}
+                            >
+                              <a
+                                target="_blank"
+                                href="explorer/token/0x0d01dc56dcaaca66ad901c959b4011ec"
+                                rel="noreferrer"
+                                style={{
+                                  color: "gray",
+                                  textDecoration: "none",
+                                }}
+                              >
+                                {" "}
+                                <svg
+                                  width="14"
+                                  height="14"
+                                  focusable="false"
+                                  aria-hidden="true"
+                                  viewBox="-2 -2 16 16"
+                                  className="sc-eDvSVe KHlvw"
+                                  style={{ marginBottom: "-2.4px" }}
+                                >
+                                  <path
+                                    d="M2.16649 1C1.52217 1 0.999851 1.52233 0.999851 2.16667V9.83333C0.999851 10.4777 1.52217 11 2.16649 11H9.83294C10.4773 11 10.9996 10.4777 10.9996 9.83333V7.16667C10.9996 6.89053 11.2235 6.66667 11.4996 6.66667C11.7757 6.66667 11.9995 6.89053 11.9995 7.16667V9.83333C11.9995 11.0299 11.0295 12 9.83294 12H2.16649C0.969905 12 -0.00012207 11.0299 -0.00012207 9.83333V2.16667C-0.00012207 0.970047 0.969905 0 2.16649 0H4.83308C5.10921 0 5.33308 0.22386 5.33308 0.5C5.33308 0.77614 5.10921 1 4.83308 1H2.16649ZM6.66634 0.5C6.66634 0.22386 6.89021 0 7.16634 0H11.4999C11.776 0 11.9999 0.22386 11.9999 0.5V4.83333C11.9999 5.10947 11.776 5.33333 11.4999 5.33333C11.2237 5.33333 10.9999 5.10947 10.9999 4.83333V1.70716L7.51988 5.18693C7.32461 5.38213 7.00808 5.38213 6.81281 5.18687C6.61755 4.9916 6.61755 4.675 6.81281 4.47976L10.2929 1H7.16634C6.89021 1 6.66634 0.77614 6.66634 0.5Z"
+                                    fill="#50D2C1"
+                                  ></path>
+                                </svg>
+                              </a>
+                              <div
+                                className="sc-pyfCe gKZuHd"
+                                style={{ display: "inline-block" }}
+                              >
+                                <div
+                                  style={{
+                                    cursor: "pointer",
+                                    padding: "0px",
+                                    lineHeight: "12px",
+                                  }}
+                                >
+                                  <svg
+                                    width="14"
+                                    height="14"
+                                    focusable="false"
+                                    aria-hidden="true"
+                                    viewBox="0 -960 960 900"
+                                    className="sc-eDvSVe ghLAkI"
+                                  >
+                                    <path
+                                      d="M240-160q-66 0-113-47T80-320v-320q0-66 47-113t113-47h480q66 0 113 47t47 113v320q0 66-47 113t-113 47H240Zm0-480h480q22 0 42 5t38 16v-21q0-33-23.5-56.5T720-720H240q-33 0-56.5 23.5T160-640v21q18-11 38-16t42-5Zm-74 130 445 108q9 2 18 0t17-8l139-116q-11-15-28-24.5t-37-9.5H240q-26 0-45.5 13.5T166-510Z"
+                                      fill="#50D2C1"
+                                      className="sc-bcXHqe iaMRsW"
+                                    ></path>
+                                  </svg>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
-
-                  {/* <div className="text-[11px] text-[#8b9bb5] md:text-right">
-                <span className="inline-block px-2 py-1 rounded bg-[#07121b]">
-                  5m
-                </span>
-              </div> */}
                 </div>
               </div>
 
               {/* Chart */}
-              <div className="flex-1 border-[#111827] m-1">
+              <div className="flex-1 m-1">
                 <TradingViewChart symbol="BTC" />
               </div>
             </div>
@@ -4101,7 +4299,7 @@ const Chart = ({ session }: { session: any }) => {
           </div>
 
           {/* Bottom tabs / balances */}
-          <div className="flex flex-col text-xs bg-[#0F1A1F] h-auto mx-1 rounded-md mb-1 p-2">
+          <div className="flex flex-col text-xs bg-[#0F1A1F] h-auto mx-1 rounded-md mb-1 p-2 h-[250px]">
             {/* Tabs + Filter row */}
             <div className="flex flex-col sm:flex-row sm:items-center border-b border-[#111827]">
               {/* Tabs (scrollable on mobile) */}
@@ -4155,7 +4353,7 @@ const Chart = ({ session }: { session: any }) => {
         </div>
 
         {/* RIGHT: TRADE PANEL */}
-        <div className="w-[284px] set_width flex flex-col bg-[#0F1A1F] p-2 m-1 rounded-md">
+        <div className="w-[284px] set_width flex flex-col bg-[#0F1A1F] p-2 m-1 rounded-md pb-12">
           {/* Trade mode tabs */}
           <div className="flex border-b border-[#111827] text-sm">
             {(["Market", "Limit", "Pro"] as TradeMode[]).map((mode) => (

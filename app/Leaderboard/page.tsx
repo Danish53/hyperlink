@@ -17,10 +17,10 @@ const LeaderboardPage = () => {
     <div className="min-h-screen bg-[#01221b] text-[#9ba3af] font-sans p-6 md:p-12 mt-8">
       
 
-      <div className="max-w-7xl mx-auto space-y-6 mt-10">
+      <div className="max-w-[1320px] mx-auto space-y-2 mt-6">
 
         {/* Title */}
-        <h1 className="text-4xl font-semibold text-white mb-8">
+        <h1 className="text-[32px] font-[400] text-white mb-2">
           Leaderboard
         </h1>
 

@@ -859,8 +859,8 @@
 //   return Math.floor(Math.random() * (max - min + 1)) + min;
 // }
 
-"use client";
 
+"use client";
 import { useEffect, useRef, useState } from "react";
 import Script from "next/script";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -911,6 +911,19 @@ const TradingViewChart = ({ symbol }: { symbol: string }) => {
         ],
       },
 
+      overrides: {
+    // 🎯 CHART BACKGROUND
+    "paneProperties.background": theme === "dark" ? "#0F1A1F" : "#ffffff",
+    "paneProperties.vertGridProperties.color": theme === "dark" ? "#1f2a30" : "#e5e7eb",
+    "paneProperties.horzGridProperties.color": theme === "dark" ? "#1f2a30" : "#e5e7eb",
+
+    // 🎯 LEFT TOOLBAR / UI
+    "scalesProperties.backgroundColor": theme === "dark" ? "#0F1A1F" : "#ffffff",
+
+    // 🎯 TEXT / ICON COLORS
+    "scalesProperties.textColor": theme === "dark" ? "#9CA3AF" : "#374151",
+  },
+
       studies: ["Volume@tv-basicstudies"],
 
       toolbar_bg: theme === "dark" ? "#0F1A1F" : "#ffffff",
@@ -928,7 +941,7 @@ const TradingViewChart = ({ symbol }: { symbol: string }) => {
         onReady={() => setReady(true)}
       />
 
-      <div className="w-full h-[550px] rounded-xl overflow-hidden border border-gray-800">
+      <div className="w-full h-[550px] rounded-lg overflow-hidden">
         <div ref={ref} id="tv_chart" className="w-full h-full" />
       </div>
     </>

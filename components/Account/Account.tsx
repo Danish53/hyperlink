@@ -28,7 +28,7 @@ const Account = ({ session }: { session: any }) => {
     <div>
       <Header session={session} />
 
-      <main className="deposit-container flex flex-col md:flex-row">
+      <main className="deposit-container flex flex-col md:flex-row bg-[#01221b]">
         {/* Sidebar */}
         <aside className="sidebar w-full md:w-1/4 p-6 border-r border-gray-700">
           <h3 className="text-xl font-semibold mb-3">Available Balance</h3>
@@ -63,7 +63,7 @@ const Account = ({ session }: { session: any }) => {
         <div className="faq-content flex-1 px-6 py-10 text-white">
           <form
             onSubmit={handleSubmit}
-            className="max-w-md mx-auto bg-[#1c1c1c] p-8 rounded-2xl border border-gray-700 shadow-lg"
+            className=" shadow-lg"
           >
             <h2 className="text-2xl font-semibold mb-6 text-[#50D2C1]">Change Account Details</h2>
 

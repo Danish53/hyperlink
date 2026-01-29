@@ -9,14 +9,14 @@ export default function PortfolioPage() {
       <>
           <Header session={session} />
     <div className="min-h-screen bg-[#01221b] text-[#9ba3af] p-6 font-sans">
-      <div className="max-w-7xl mx-auto space-y-6 mt-10">
+      <div className="max-w-[1320px] mx-auto space-y-2 mt-10">
 
         {/* TOP HEADER */}
-        <div className="flex justify-between items-center pt-8">
+        <div className="flex justify-between items-center pt-6">
           <h1 className="text-2xl font-semibold text-white">
             Staking
           </h1>
-          <button className="bg-[#6efedb] text-[#061612] text-sm px-4 py-2 rounded-lg font-bold">
+          <button className="bg-[#6efedb] text-[#061612] text-sm px-4 py-2 rounded-md font-bold">
             Connect
           </button>
         </div>
@@ -27,7 +27,7 @@ export default function PortfolioPage() {
         </p>
 
         {/* TOP STATS */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6" style={{gap: "10px", marginTop: "30px"}}>
           <div className="bg-[#050f12] border border-[#050f12] rounded-xl p-6">
             <p className="text-sm text-[#6b7280]">Total Staked</p>
             <p className="text-2xl font-semibold text-white mt-2">

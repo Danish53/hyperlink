@@ -5,14 +5,14 @@ import Link from 'next/link';
 import Image from 'next/image';
 const Faq = ({ session }: { session: any }) => {
   return (
-    <div className="min-h-screen bg-[#1a1a1a] text-white flex flex-col">
+    <div className="min-h-screen bg-[#01221b] text-white flex flex-col">
       <Header session={session} />
 
       <main className="flex-1 w-full max-w-7xl mx-auto p-6 py-22">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* LEFT MENU */}
-          <nav className="bg-[#1e1e1e] rounded-lg p-6 shadow-md border border-[#292929] w-full lg:w-1/4">
-            <ul className="space-y-3">
+          <nav className="bg-[#050f12] rounded-lg p-6 shadow-md border border-[#292929] w-full lg:w-1/4">
+            <ul className="space-y-3 text-[12px]">
               <li>
                 <Link
                   href="/Faq/GettingStarted"
@@ -65,7 +65,7 @@ const Faq = ({ session }: { session: any }) => {
           </nav>
 
           {/* RIGHT CONTENT */}
-          <div className="flex-1 bg-[#1e1e1e] rounded-lg p-6 shadow-md border border-[#292929]">
+          <div className="flex-1 bg-[#050f12] rounded-lg p-6 shadow-md border border-[#292929]">
             <div className="flex items-center gap-3 mb-6 justify-center">
               <Image src="/images/icons/faq.png" alt="FAQ Icon" width={120} height={120} />
             </div>
@@ -148,10 +148,10 @@ const Faq = ({ session }: { session: any }) => {
               ].map((category, i) => (
                 <div
                   key={i}
-                  className="bg-[#252525] rounded-lg p-5 border border-[#333] hover:border-[#50D2C1] transition"
+                  className="bg-[#050f12] rounded-lg p-5 border border-[#333] hover:border-[#50D2C1] transition"
                 >
                   <h3 className="text-xl font-semibold text-[#50D2C1] mb-3">{category.title}</h3>
-                  <ul className="space-y-2 text-gray-300 text-sm">
+                  <ul className="space-y-2 text-gray-300 text-[12px]">
                     {category.links.map((link, j) => (
                       <li key={j}>
                         <Link href={category.href} className="hover:text-[#50D2C1] transition">

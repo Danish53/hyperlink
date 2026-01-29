@@ -611,11 +611,22 @@ const MAIN_LINKS = [
   { href: "/Leaderboard", label: "Leaderboard" },
 ];
 
-const EXTRA_LINKS = [
+const EXTRA_LINKS = [  
+  { href: "/", label: "Testnet" },
+  { href: "/", label: "explorer" },
+  { href: "/", label: "sub-Accounts" },
+  { href: "/", label: "API" },
+  { href: "/", label: "Multi-Sig" },
+  { href: "/", label: "Points" },
+  { href: "/", label: "funding comparison" },
+  { href: "/", label: "Announcements" },
+  { href: "/", label: "State" },
+  { href: "/", label: "Docs" },
   { href: "/Account/Deposit", label: "Wallet" },
   { href: "/Account", label: "Account" },
   { href: "/Faq", label: "FAQ" },
   { href: "/Support", label: "Support" },
+
 ];
 
 // -----------------  LOGO COMPONENT  -----------------
@@ -876,7 +887,7 @@ export default function Header({ session }: { session: Session | null }) {
                   </button>
 
                   {moreOpen && (
-                    <div className="absolute left-0 mt-2 max-w-[273px] w-[120px] rounded-lg bg-white dark:bg-[#1B2429] border border-gray-300 dark:border-gray-700 shadow-lg z-40">
+                    <div className="absolute left-0 mt-1 max-w-[273px] w-[150px] rounded-lg bg-white dark:bg-[#1B2429] border border-gray-300 dark:border-gray-700 shadow-lg z-40">
                       <ul className="py-1 text-sm text-gray-800 dark:text-gray-100">
                         {EXTRA_LINKS.map((link) => (
                           <li key={link.href} className="hover:text-[#00D5BE]">

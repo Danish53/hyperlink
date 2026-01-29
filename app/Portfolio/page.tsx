@@ -33,7 +33,7 @@ const NavButton = ({
 }) => (
   <button
     type="button"
-    className={`flex items-center gap-1.5 px-4 py-1.5 rounded-md text-[11px] font-medium
+    className={`flex items-center gap-1.5 px-3 rounded-md text-[12px] font-[400] h-[40px]
       border border-[#1c3a34]
       ${
         filled
@@ -67,10 +67,10 @@ const CryptoDashboard = () => {
 
       {/* PAGE BACKGROUND – dark green + radial pattern jaisa screenshot */}
       <div className="min-h-screen bg-[#01221b] bg-[radial-gradient(circle_at_top_right,#064e3b44,transparent_65%)] text-gray-200 font-sans pt-16 pb-8">
-        <div className="max-w-[1450px] mx-auto px-4 sm:px-6">
+        <div className="max-w-[1312px] mx-auto px-4 sm:px-4">
           {/* ===== TOP TITLE + ACTION BUTTONS ===== */}
-          <div className="flex flex-col lg:flex-row justify-between gap-4 mt-8">
-            <h1 className="text-[32px] font-semibold text-white">Portfolio</h1>
+          <div className="flex flex-col lg:flex-row justify-between gap-4 mt-6">
+            <h1 className="text-[34px] font-[400] text-white">Portfolio</h1>
 
             <div className="flex flex-wrap gap-2">
               <NavButton icon={LinkIcon}>Link Staking</NavButton>
@@ -85,9 +85,9 @@ const CryptoDashboard = () => {
           </div>
 
           {/* ===== TOP STATS + CHART ROW ===== */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 mb-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 mb-6" style={{gap: "10px", marginTop: "30px"}}>
             {/* LEFT COLUMN : 14D Volume + Fees  ------------------- */}
-            <div className="lg:col-span-1 space-y-4">
+            <div className="lg:col-span-1 space-y-2">
               {/* 14 Day Volume card */}
               <div className="bg-[#050f12] border border-[#050f12] shadow-md p-5 rounded-xl">
                 <p className="text-[11px] text-gray-400 uppercase mb-2 tracking-wide">
@@ -130,7 +130,7 @@ const CryptoDashboard = () => {
                 </button>
               </div>
 
-              <div className="space-y-3 text-[11px]">
+              <div className="space-y-2 text-[11px]">
                 {[
                   ["PNL", "$0.00"],
                   ["Volume", "$0.00"],

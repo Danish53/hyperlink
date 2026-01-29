@@ -151,24 +151,24 @@ const VaultsPage = () => {
   return (
     <>
       <Header session={null} />
-      <div className="min-h-screen bg-[#01221b] text-[#9ba3af] font-sans p-8 mt-8">
-        <div className="max-w-[1250px] mx-auto">
+      <div className=" bg-[#01221b] text-[#9ba3af] font-sans p-8 mt-8">
+        <div className="max-w-[1320px] mx-auto">
           {/* Header & Connect Button */}
-          <div className="flex justify-between items-end mt-8">
-            <h1 className="text-white text-4xl font-semibold">Vaults</h1>
-            <button className="bg-[#6efedb] text-[#061612] px-5 py-2 rounded-lg font-bold text-[12px]">
+          <div className="flex justify-between items-end mt-6">
+            <h1 className="text-[34px] font-[400] text-white">Vaults</h1>
+            <button className="bg-[#6efedb] text-[#061612] px-5 rounded-md text-[12px] h-[40px]">
               Connect
             </button>
           </div>
 
           {/* TVL card */}
-          <div className="bg-[#050f12] border border-[#050f12] shadow-lg p-5 rounded-lg w-[280px] mb-8 mt-4">
+          <div className="bg-[#050f12] border border-[#050f12] shadow-lg p-5 rounded-lg w-[280px] mb-2 mt-4">
             <p className="text-[#6b7280] text-sm mb-2">Total Value Locked</p>
             <p className="text-white text-3xl font-semibold">$334,447,359</p>
           </div>
 
           {/* Search + Filters */}
-          <div className="flex justify-between items-center bg-[#050f12] border border-[#050f12] rounded-lg mb-4 p-6">
+          <div className="flex justify-between items-center bg-[#050f12] border border-[#050f12] rounded-lg p-6">
             {/* Search */}
             <div className="relative w-[360px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#4b5563]" />
@@ -235,17 +235,17 @@ const VaultsPage = () => {
           </div>
 
           {/* Table */}
-          <div className="bg-[#050f12] border border-[#050f12] rounded-lg overflow-hidden text-sm">
-            <table className="w-full border-collapse min-w-[900px]">
+          <div className="bg-[#050f12] border border-[#050f12] rounded-lg overflow-hidden text-sm mt-1">
+            <table className="w-full border-collapse min-w-[900px] bg-[#050f12]">
               <thead>
-                <tr className="text-[#050f12] border-b border-[#050f12]">
-                  <th className="px-6 py-3 text-left font-semibold">Vault</th>
-                  <th className="px-6 py-3 font-semibold">Leader</th>
-                  <th className="px-6 py-3 font-semibold">APR</th>
-                  <th className="px-6 py-3 font-semibold">TVL</th>
-                  <th className="px-6 py-3 font-semibold">Your Deposit</th>
-                  <th className="px-6 py-3 font-semibold text-right">Age (days)</th>
-                  <th className="px-6 py-3 font-semibold text-right">Snapshot</th>
+                <tr className="">
+                  <th className="px-6 py-2 text-left font-semibold">Vault</th>
+                  <th className="px-6 py-2 font-semibold">Leader</th>
+                  <th className="px-6 py-2 font-semibold">APR</th>
+                  <th className="px-6 py-2 font-semibold">TVL</th>
+                  <th className="px-6 py-2 font-semibold">Your Deposit</th>
+                  <th className="px-6 py-2 font-semibold text-right">Age (days)</th>
+                  <th className="px-6 py-2 font-semibold text-right">Snapshot</th>
                 </tr>
               </thead>
               <tbody>
@@ -253,7 +253,7 @@ const VaultsPage = () => {
                 <tr>
                   <td
                     colSpan={7}
-                    className="px-6 py-2 font-semibold text-white border-b border-[#1d2d29] bg-[#061a16]"
+                    className="px-6 py-2 font-semibold text-white"
                   >
                     Protocol Vaults
                   </td>
@@ -267,7 +267,7 @@ const VaultsPage = () => {
                 <tr>
                   <td
                     colSpan={7}
-                    className="px-6 py-2 font-semibold text-white border-t border-b border-[#1d2d29] bg-[#061a16]"
+                    className="px-6 py-2 font-semibold text-white"
                   >
                     User Vaults
                   </td>
