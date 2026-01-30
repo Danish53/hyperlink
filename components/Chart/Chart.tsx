@@ -3516,6 +3516,7 @@
 
 /* ============================= Trade Drawer ============================= */
 
+// @ts-nocheck
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 // import TradingViewChart from "./TradingViewChart";
@@ -3525,6 +3526,9 @@ import MarketsModal from "../../components/MarketsDropdown";
 import {
   BarChart3,
   ChevronDown,
+  ChevronUp,
+  CopyIcon,
+  ExternalLink,
   Search,
   SortAsc,
   UserCircle2,
@@ -3532,6 +3536,7 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
+import MarketsModel from "../MarketsModel";
 type OrderBookTab = "orderbook" | "trades";
 type BottomTab =
   | "Balances"
@@ -3799,6 +3804,70 @@ const buyOrders = [
   { price: "27.529", size: "0.37", total: "2,255.42", depth: 90 },
 ];
 
+type Stats = {
+  last: number;
+  changeAbs: number; // negative for down
+  changePct: number; // negative for down
+  volume24h: string;
+  marketCap: string;
+  address: string;
+};
+
+const ChevronDown = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}>
+    <path
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M6 9l6 6 6-6"
+    />
+  </svg>
+);
+const ChevronUp = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}>
+    <path
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M18 15l-6-6-6 6"
+    />
+  </svg>
+);
+const ExternalLink = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}>
+    <path
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M14 3h7v7M10 14L21 3M21 14v7h-7"
+    />
+    <path
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M10 21H3v-7"
+    />
+  </svg>
+);
+const CopyIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}>
+    <rect x="9" y="9" width="13" height="13" rx="2" strokeWidth="2" />
+    <rect x="2" y="2" width="13" height="13" rx="2" strokeWidth="2" />
+  </svg>
+);
+
+// Just a placeholder token icon
+// const TokenIcon = () => (
+//   <div className="w-6 h-6 rounded-md bg-teal-500/20 border border-teal-600/40 flex items-center justify-center">
+//     <div className="w-3 h-3 rounded-full bg-teal-400" />
+//   </div>
+// );
+
+function shorten(addr: string) {
+  if (!addr) return "";
+  return addr.length <= 12 ? addr : `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+}
+
 const Chart = ({ session }: { session: any }) => {
   const [orderBookTab, setOrderBookTab] = useState<OrderBookTab>("orderbook");
   const [bottomTab, setBottomTab] = useState<BottomTab>("Balances");
@@ -3806,6 +3875,7 @@ const Chart = ({ session }: { session: any }) => {
   const [tradeSide, setTradeSide] = useState<TradeSide>("Buy");
   const [sizePercent, setSizePercent] = useState(0);
   const [isTradeOpen, setIsTradeOpen] = useState(false);
+  const [openModel, setOpenModel] = useState(false);
 
   const [moreOpen, setMoreOpen] = useState(false);
 
@@ -3840,6 +3910,31 @@ const Chart = ({ session }: { session: any }) => {
     { time: "20:08:11", price: "32.500", size: "0.13", side: "sell" as const },
     { time: "20:08:08", price: "32.495", size: "0.77", side: "sell" as const },
   ];
+
+  // Demo data exactly like the screenshot
+  const stats: Stats = {
+    last: 28.818,
+    changeAbs: -3.652,
+    changePct: -11.25,
+    volume24h: "231,969,056.20 USDC",
+    marketCap: "8,674,413,348 USDC",
+    address: "0x0d01f2b6c7d9aa2ab371c...11ec".replace("...", ""), // we'll show shortened below
+  };
+
+  const isUp = stats.changeAbs >= 0;
+  const [expanded, setExpanded] = useState(false);
+
+  const contentRef = useRef<HTMLDivElement>(null);
+  const maxHeight = useMemo(() => {
+    const el = contentRef.current;
+    return expanded && el ? el.scrollHeight : 0;
+  }, [expanded]);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(stats.address);
+    } catch {}
+  };
 
   return (
     <>
@@ -4705,32 +4800,163 @@ const Chart = ({ session }: { session: any }) => {
       <div className="all_trade_mobile min-h-screen w-full bg-[#0B1518] text-white flex flex-col items-center">
         <Header session={session} />
         {/* Fixed-width card so desktop look doesn't get affected if someone opens it on big screens via dev tools */}
-        <div className="w-[355px] max-w-[355px] min-w-[100%] bg-[#0F1A1F] border border-[#142028] rounded-lg overflow-hidden shadow-md my-2">
+        <div className="w-[355px] mt-[22px] max-w-[355px] min-w-[100%] bg-[#0F1A1F] border border-[#142028] rounded-lg overflow-hidden shadow-md my-2">
           {/* Header: Pair + Price + Tabs */}
           <div className="px-3 py-3 border-b border-[#142028]">
-            <div className="flex items-center gap-2 text-xs">
-              <span className="px-2 py-0.5 rounded bg-[#071720] text-teal-300 border border-[#11343f]">
-                Spot
-              </span>
-              <span className="text-sm font-semibold">HYPE/USDC</span>
-            </div>
+            <div className="w-full bg-[#0b171f] border-b border-[#142028] text-white">
+              {/* Top Row */}
+              <div className="px-1 py-1">
+                <div className="flex items-start justify-between gap-3">
+                  {/* Left: Pair + Spot */}
+                  <div className="flex items-center gap-1">
+                    {/* <TokenIcon /> */}
+                    <svg
+          width="32"
+          height="32"
+          viewBox="0 0 32 32"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          style={{ transform: "translateY(2px)" }}
+          // className="all_trade_mobile"
+        >
+          <g clipPath="url(#clip0_623_29714)">
+            <path
+              d="M20.4523 14.5389C20.471 16.2176 20.1196 17.8218 19.4292 19.3544C18.4434 21.5368 16.0799 23.3213 13.9218 21.4218C12.1616 19.8736 11.8351 16.7306 9.19798 16.2705C5.7088 15.8477 5.62483 19.8923 3.34536 20.3492C0.804661 20.8653 -0.0380915 16.5938 -0.000774032 14.6539C0.0365434 12.714 0.552769 9.98759 2.76072 9.98759C5.30142 9.98759 5.47245 13.8332 8.69731 13.6249C11.8911 13.4073 11.947 9.40624 14.0337 7.69329C15.8343 6.2135 17.952 7.29847 19.0125 9.07982C19.9952 10.7275 20.4274 12.6612 20.4492 14.5389H20.4523Z"
+              fill="#46c4b3"
+            ></path>
+          </g>
+          <defs>
+            <clipPath id="clip0_623_29714">
+              <rect width="115" height="32" fill="white"></rect>
+            </clipPath>
+          </defs>
+        </svg>
+                    <div className="flex flex-col" >
+                      <div className="flex items-center gap-1 text-[15px] font-semibold tracking-wide"
+                      onClick={() => setOpenModel(true)}>
+                        <span className="text-[20px] font-[400]">HYPE/USDC</span>
+                        <ChevronDown className="w-6 h-6 text-[#8b9bb5]" />
+                      </div>
+                      <div className="text-xs text-teal-300">Spot</div>
+                    </div>
+                    <MarketsModel open={openModel} onClose={() => setOpenModel(false)} />
 
-            <div className="mt-2 flex items-end justify-between">
-              <div className="flex items-baseline gap-3">
-                <span
-                  className={`text-xl font-semibold ${
-                    price.isUp ? "text-emerald-400" : "text-teal-300"
-                  }`}
-                >
-                  {price.last}
-                </span>
-                <span
-                  className={`text-sm ${
-                    price.isUp ? "text-emerald-400" : "text-rose-400"
-                  }`}
-                >
-                  {price.changeAbs} / {price.changePct}
-                </span>
+      {/* Inline keyframes for the modal animations */}
+      <style>{`
+        @keyframes slideUp {
+          from { transform: translateY(12px); opacity: 0 }
+          to { transform: translateY(0); opacity: 1 }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0 } to { opacity: 1 }
+        }
+      `}</style>
+                  </div>
+
+                  {/* Right: Price + Change + Toggle */}
+                  <div
+                    className="flex items-center gap-2 select-none cursor-pointer"
+                    onClick={() => setExpanded((v) => !v)}
+                    role="button"
+                    aria-expanded={expanded}
+                    title="Toggle details"
+                  >
+                    <div className="text-right">
+                      <div
+                        className={`text-[24px] font-semibold leading-6 ${isUp ? "text-[#46c4b3]" : "text-[#46c4b3]"}`}
+                      >
+                        {stats.last}
+                      </div>
+                      <div
+                        className={`text-[12px] ${isUp ? "text-[#46c4b3]" : "text-rose-400"}`}
+                      >
+                        {stats.changeAbs} / {stats.changePct}%
+                      </div>
+                    </div>
+
+                     <button
+    aria-label="Expand/Collapse"
+    type="button"
+    className="ml-1 flex items-center justify-center w-8 h-8 rounded-md border border-[#1b2b35]"
+    onClick={(e) => {
+                        e.stopPropagation();
+                        setExpanded((v) => !v);
+                      }}
+  >
+    {expanded ? (
+      <ChevronUp size={12} className="stroke-[#8b9bb5]" />
+    ) : (
+      <ChevronDown size={12} className="stroke-[#8b9bb5]" />
+    )}
+  </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-[#142028]" />
+
+              {/* Accordion Content (height show/hide) */}
+              <div
+                className="overflow-hidden transition-[max-height] duration-300 ease-in-out flex"
+                style={{ maxHeight }}
+              >
+                <div ref={contentRef} className="px-2 py-2 w-full">
+                  <div className="grid grid-cols-2 gap-y-4 gap-x-10 text-sm">
+                    {/* Left column */}
+                    <div className="space-y-3 flex justify-between">
+                      <div>
+                        <div className="text-[#8b9bb5] underline decoration-[#2a3a45] underline-offset-2">
+                          Price
+                        </div>
+                        <div className="mt-1 text-[#cfe3ef]">{stats.last}</div>
+                      </div>
+
+                      <div>
+                        <div className="text-[#8b9bb5]">Market Cap</div>
+                        <div className="mt-1 text-[#cfe3ef]">
+                          {stats.marketCap}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right column */}
+                    <div className="space-y-3 flex justify-between">
+                      <div>
+                        <div className="text-[#8b9bb5]">24H Volume</div>
+                        <div className="mt-1 text-[#cfe3ef]">
+                          {stats.volume24h}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1">
+                          <div className="text-[#8b9bb5]">More Info</div>
+                          <div className="mt-1 text-[#cfe3ef]">
+                            {shorten(stats.address)}
+                          </div>
+                        </div>
+
+                        {/* Actions */}
+                        <button
+                          onClick={handleCopy}
+                          className="p-1 rounded border border-[#1b2b35] bg-[#0d212a] text-[#9ab0c2] hover:text-white"
+                          title="Copy address"
+                        >
+                          <CopyIcon className="w-4 h-4" />
+                        </button>
+                        <a
+                          href="#"
+                          onClick={(e) => e.preventDefault()}
+                          className="p-1 rounded border border-[#1b2b35] bg-[#0d212a] text-[#9ab0c2] hover:text-white"
+                          title="Open in explorer"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -4739,7 +4965,7 @@ const Chart = ({ session }: { session: any }) => {
                 <button
                   key={t}
                   onClick={() => setTopTab(t)}
-                  className={`pb-2 transition border-b-2 ${
+                  className={`pb-2 w-[30%] transition border-b-2 ${
                     topTab === t
                       ? "border-teal-400 text-teal-300"
                       : "border-transparent text-[#8b9bb5] hover:text-white"
@@ -4944,10 +5170,10 @@ const Chart = ({ session }: { session: any }) => {
         <nav className="fixed bottom-0 inset-x-0 bg-[#0F1A1F] border-t border-[#142028]">
           <div className="mx-auto w-[355px] max-w-[355px] min-w-[355px] flex items-center justify-around py-2">
             <Link href={"/"}>
-            <button className="flex flex-col items-center gap-1 text-[11px] text-[#cdd5db]">
-              <BarChart3 className="w-5 h-5 text-[#7ce0d5]" />
-              Markets
-            </button>
+              <button className="flex flex-col items-center gap-1 text-[11px] text-[#cdd5db]">
+                <BarChart3 className="w-5 h-5 text-[#7ce0d5]" />
+                Markets
+              </button>
             </Link>
 
             <Link href={"/tradeTab"}>
@@ -4960,15 +5186,14 @@ const Chart = ({ session }: { session: any }) => {
               </button>
             </Link>
 
-<Link href={"/AccountTab"}>
-            <button className="flex flex-col items-center gap-1 text-[11px] text-[#cdd5db]">
-              <UserCircle2 className="w-5 h-5 text-[#7ce0d5]" />
-              Account
-            </button>
+            <Link href={"/AccountTab"}>
+              <button className="flex flex-col items-center gap-1 text-[11px] text-[#cdd5db]">
+                <UserCircle2 className="w-5 h-5 text-[#7ce0d5]" />
+                Account
+              </button>
             </Link>
           </div>
         </nav>
-
       </div>
     </>
   );
