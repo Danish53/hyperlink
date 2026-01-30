@@ -64,12 +64,12 @@ function Segmented({
 }) {
   return (
     <div className="inline-flex items-center gap-2">
-      <div className="bg-[#0d212a] border border-[#1b2b35] rounded-lg p-0.5">
+      <div className="bg-[#0d212a] border border-[#1b2b35] rounded-lg">
         <button
           onClick={() => onChange("strict")}
           className={`px-3 py-1.5 text-sm rounded-md transition ${
             value === "strict"
-              ? "bg-teal-700/40 text-white border border-teal-500/40"
+              ? "bg-[#50D2C1] text-white border border-teal-500/40"
               : "text-[#8b9bb5] hover:text-white"
           }`}
         >
@@ -181,10 +181,10 @@ function MarketRow({
 
         {/* Last / Change */}
         <div className="text-right">
-          <div className="text-[13px] text-emerald-400">{m.lastPrice}</div>
+          <div className="text-[13px] text-[#50D2C1]">{m.lastPrice}</div>
           <div
             className={`text-[11px] ${
-              m.changePct >= 0 ? "text-emerald-400" : "text-rose-400"
+              m.changePct >= 0 ? "text-[#50D2C1]" : "text-rose-400"
             }`}
           >
             {m.changePct >= 0 ? "+" : ""}
@@ -283,12 +283,12 @@ function MarketsModel({
           <div className="px-3 py-3 flex items-center justify-between border-b border-[#142028]">
             <div className="text-[15px] font-semibold">Markets</div>
             <button
-              onClick={onClose}
               aria-label="Close"
               type="button"
-              className="w-8 h-8 grid place-items-center rounded-md border border-[#1b2b35] bg-[#0d212a] text-[#8b9bb5] hover:text-white"
+              onClick={onClose}
+              className="ml-1 flex items-center justify-center w-8 h-8 rounded-md border border-[#1b2b35]"
             >
-              <X size={12} className="stroke-[#8b9bb5]"  />
+              <X size={12} className="w-[24px] stroke-[#8b9bb5]" />
             </button>
           </div>
 
@@ -299,7 +299,7 @@ function MarketsModel({
               <input
                 ref={inputRef}
                 placeholder="Search"
-                className="w-full pl-8 pr-3 py-2 rounded-md bg-[#0d212a] border border-[#1b2b35] text-sm text-white placeholder-[#8b9bb5] focus:outline-none focus:border-teal-500/40"
+                className="w-full pl-8 pr-3 py-2 rounded-md border border-[#1b2b35] text-sm text-white placeholder-[#8b9bb5] focus:outline-none focus:border-teal-500/40"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
               />

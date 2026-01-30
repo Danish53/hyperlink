@@ -314,29 +314,29 @@ const AccountTab = ({ session }: { session: any }) => {
 
       {/* Sticky bottom nav (like the screenshot) */}
       <nav className="fixed bottom-0 inset-x-0 bg-[#0F1A1F] border-t border-[#142028]">
-                <div className="mx-auto w-[355px] max-w-[355px] min-w-[355px] flex items-center justify-around py-2">
+                <div className="mx-auto w-[355px] max-w-[355px] min-w-[355px] flex items-center justify-around py-3">
                   <Link href={"/"}>
-                  <button className="flex flex-col items-center gap-1 text-[11px] text-[#cdd5db]">
-                    <BarChart3 className="w-5 h-5 text-[#7ce0d5]" />
-                    Markets
-                  </button>
+                    <button className="flex items-center gap-1.5 text-[11px] text-[#cdd5db]">
+                      <BarChart3 className="w-5 h-5 text-[#7ce0d5]" />
+                      Markets
+                    </button>
                   </Link>
       
                   <Link href={"/tradeTab"}>
                     <button
                       onClick={() => setIsTradeOpen(true)}
-                      className="flex flex-col items-center gap-1 text-[11px] text-[#cdd5db]"
+                      className="flex items-center gap-1.5 text-[11px] text-[#cdd5db]"
                     >
                       <Wallet2 className="w-5 h-5 text-[#7ce0d5]" />
                       Trade
                     </button>
                   </Link>
       
-      <Link href={"/AccountTab"}>
-                  <button className="flex flex-col items-center gap-1 text-[11px] text-[#cdd5db]">
-                    <UserCircle2 className="w-5 h-5 text-[#7ce0d5]" />
-                    Account
-                  </button>
+                  <Link href={"/AccountTab"}>
+                    <button className="flex items-center gap-1.5 text-[11px] text-[#cdd5db]">
+                      <UserCircle2 className="w-5 h-5 text-[#7ce0d5]" />
+                      Account
+                    </button>
                   </Link>
                 </div>
               </nav>

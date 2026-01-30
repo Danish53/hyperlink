@@ -3,7 +3,15 @@ import { useEffect, useMemo, useRef, useState } from "react";
 // import TradingViewChart from "./TradingViewChart";
 // import Footer from "../shared/footer";
 // import MarketsModal from "../../components/MarketsDropdown";
-import { BarChart3, ChevronDown, Search, SortAsc, UserCircle2, Wallet2, X } from "lucide-react";
+import {
+  BarChart3,
+  ChevronDown,
+  Search,
+  SortAsc,
+  UserCircle2,
+  Wallet2,
+  X,
+} from "lucide-react";
 import Header from "@/components/shared/header";
 import Link from "next/link";
 import { headers } from "next/headers";
@@ -124,8 +132,14 @@ function TradingViewChart({
         studies: ["Volume@tv-basicstudies"],
         backgroundColor: "#0F1A1F",
         gridColor: "rgba(255,255,255,0.08)",
-        loading_screen: { backgroundColor: "#0F1A1F", foregroundColor: "#0F1A1F" },
-        drawings_access: { type: "black", tools: [{ name: "Regression Trend" }] },
+        loading_screen: {
+          backgroundColor: "#0F1A1F",
+          foregroundColor: "#0F1A1F",
+        },
+        drawings_access: {
+          type: "black",
+          tools: [{ name: "Regression Trend" }],
+        },
         disabled_features: [
           "header_settings",
           "header_compare",
@@ -211,7 +225,7 @@ const TradeDrawer = ({ session }: { session: any }) => {
       changePct: "-1.72%",
       isUp: false,
     }),
-    []
+    [],
   );
 
   if (!open) return null;
@@ -223,74 +237,74 @@ const TradeDrawer = ({ session }: { session: any }) => {
   });
 
   const recentTrades = [
-  { time: "20:08:21", price: "32.520", size: "0.42", side: "sell" as const },
-  { time: "20:08:17", price: "32.535", size: "1.02", side: "buy" as const },
-  { time: "20:08:11", price: "32.500", size: "0.13", side: "sell" as const },
-  { time: "20:08:08", price: "32.495", size: "0.77", side: "sell" as const },
-];
+    { time: "20:08:21", price: "32.520", size: "0.42", side: "sell" as const },
+    { time: "20:08:17", price: "32.535", size: "1.02", side: "buy" as const },
+    { time: "20:08:11", price: "32.500", size: "0.13", side: "sell" as const },
+    { time: "20:08:08", price: "32.495", size: "0.77", side: "sell" as const },
+  ];
 
   return (
     <>
-    <div className="all_trade_mobile min-h-screen w-full bg-[#0B1518] text-white flex flex-col items-center">
-      <Header session={session} />
-      <div className="flex mt-3">
-      <div className="w-[50%] set_width flex flex-col p-2 m-1 rounded-md pb-12">
-          {/* Trade mode tabs */}
-          <div className="flex border-b border-[#111827] text-sm">
-            {(["Market", "Limit", "Pro"] as TradeMode[]).map((mode) => (
-              <button
-                key={mode}
-                onClick={() => setTradeMode(mode)}
-                className={`flex-1 text-[12px] py-2 cursor-pointer font-medium ${
-                  tradeMode === mode
-                    ? "text-teal-300 border-b-2 border-teal-400"
-                    : "text-[#8b9bb5]"
-                }`}
-              >
-                {mode}
-              </button>
-            ))}
-          </div>
-
-          {/* Content */}
-          <div className="flex-1 p-4 flex flex-col gap-4 text-xs">
-            {/* Buy / Sell toggle */}
-            <div className="flex rounded-lg bg-[#273035] text-sm">
-              <button
-                onClick={() => setTradeSide("Buy")}
-                className={`flex-1 text-[12px] py-2 rounded-lg ${
-                  tradeSide === "Buy"
-                    ? "bg-teal-400 text-black"
-                    : "text-[#8b9bb5]"
-                }`}
-              >
-                Buy
-              </button>
-              <button
-                onClick={() => setTradeSide("Sell")}
-                className={`flex-1 text-[12px] py-2 rounded-lg ${
-                  tradeSide === "Sell"
-                    ? "bg-teal-400 text-black"
-                    : "text-[#8b9bb5]"
-                }`}
-              >
-                Sell
-              </button>
+      <div className="all_trade_mobile min-h-screen w-full bg-[#0B1518] text-white flex flex-col items-center">
+        <Header session={session} />
+        <div className="flex mt-3">
+          <div className="w-[50%] set_width flex flex-col p-2 m-1 rounded-md pb-12">
+            {/* Trade mode tabs */}
+            <div className="flex border-b border-[#111827] text-sm">
+              {(["Market", "Limit", "Pro"] as TradeMode[]).map((mode) => (
+                <button
+                  key={mode}
+                  onClick={() => setTradeMode(mode)}
+                  className={`flex-1 text-[12px] py-2 cursor-pointer font-medium ${
+                    tradeMode === mode
+                      ? "text-teal-300 border-b-2 border-teal-400"
+                      : "text-[#8b9bb5]"
+                  }`}
+                >
+                  {mode}
+                </button>
+              ))}
             </div>
 
-            {/* Available to trade */}
-            <div className="flex justify-between text-[11px] text-[#8b9bb5]">
-              <span className="underline">Available to Trade</span>
-              <span className="text-white">0.00 USDC</span>
-            </div>
-
-            {/* Size + slider */}
-            <div className="space-y-2">
-              <div className="flex justify-between text-[11px] text-[#8b9bb5] p-2 border border-gray-700 rounded-lg">
-                <span>Size</span>
-                <span>HYPE</span>
+            {/* Content */}
+            <div className="flex-1 p-4 flex flex-col gap-4 text-xs">
+              {/* Buy / Sell toggle */}
+              <div className="flex rounded-lg bg-[#273035] text-sm">
+                <button
+                  onClick={() => setTradeSide("Buy")}
+                  className={`flex-1 text-[12px] py-2 rounded-lg ${
+                    tradeSide === "Buy"
+                      ? "bg-teal-400 text-black"
+                      : "text-[#8b9bb5]"
+                  }`}
+                >
+                  Buy
+                </button>
+                <button
+                  onClick={() => setTradeSide("Sell")}
+                  className={`flex-1 text-[12px] py-2 rounded-lg ${
+                    tradeSide === "Sell"
+                      ? "bg-teal-400 text-black"
+                      : "text-[#8b9bb5]"
+                  }`}
+                >
+                  Sell
+                </button>
               </div>
-              {/* <input
+
+              {/* Available to trade */}
+              <div className="flex justify-between text-[11px] text-[#8b9bb5]">
+                <span className="underline">Available to Trade</span>
+                <span className="text-white">0.00 USDC</span>
+              </div>
+
+              {/* Size + slider */}
+              <div className="space-y-2">
+                <div className="flex justify-between text-[11px] text-[#8b9bb5] p-2 border border-gray-700 rounded-lg">
+                  <span>Size</span>
+                  <span>HYPE</span>
+                </div>
+                {/* <input
                 type="range"
                 min={0}
                 max={100}
@@ -298,74 +312,69 @@ const TradeDrawer = ({ session }: { session: any }) => {
                 onChange={(e) => setSizePercent(Number(e.target.value))}
                 className="w-full accent-teal-400"
               /> */}
-              {/* <div className="flex justify-between text-[11px] text-[#8b9bb5]">
+                {/* <div className="flex justify-between text-[11px] text-[#8b9bb5]">
                 <span>0%</span>
                 <span>{sizePercent}%</span>
               </div> */}
+              </div>
             </div>
+          </div>
+          <div className="w-[50%] set_width flex flex-col p-2 m-1 rounded-md pb-12">
+            {sellOrders.map((row, idx) => (
+              <div
+                key={`sell-${idx}`}
+                className="relative flex justify-between px-3 py-[4px]"
+              >
+                <div
+                  className="absolute inset-y-0 right-0 bg-red-500/15"
+                  style={{ width: `${row.depth}%` }}
+                />
+                <span className="text-red-400 z-10">{row.price}</span>
+                <span className="text-right z-10">{row.size}</span>
+                <span className="text-right z-10">{row.total}</span>
+              </div>
+            ))}
 
-            
+            {/* Spread */}
+            <div className="flex justify-between px-3 py-2 bg-[#07121b] text-[11px] text-[#8b9bb5]">
+              <span>Spread</span>
+              <span>0.000</span>
+              <span>0.022%</span>
+            </div>
           </div>
         </div>
-        <div className="w-[50%] set_width flex flex-col p-2 m-1 rounded-md pb-12">
-        {sellOrders.map((row, idx) => (
-                    <div
-                      key={`sell-${idx}`}
-                      className="relative flex justify-between px-3 py-[4px]"
-                    >
-                      <div
-                        className="absolute inset-y-0 right-0 bg-red-500/15"
-                        style={{ width: `${row.depth}%` }}
-                      />
-                      <span className="text-red-400 z-10">{row.price}</span>
-                      <span className="text-right z-10">{row.size}</span>
-                      <span className="text-right z-10">{row.total}</span>
-                    </div>
-                  ))}
 
-                  {/* Spread */}
-                  <div className="flex justify-between px-3 py-2 bg-[#07121b] text-[11px] text-[#8b9bb5]">
-                    <span>Spread</span>
-                    <span>0.000</span>
-                    <span>0.022%</span>
+        {/* Sticky bottom nav (like the screenshot) */}
+        <nav className="fixed bottom-0 inset-x-0 bg-[#0F1A1F] border-t border-[#142028]">
+                  <div className="mx-auto w-[355px] max-w-[355px] min-w-[355px] flex items-center justify-around py-3">
+                    <Link href={"/"}>
+                      <button className="flex items-center gap-1.5 text-[11px] text-[#cdd5db]">
+                        <BarChart3 className="w-5 h-5 text-[#7ce0d5]" />
+                        Markets
+                      </button>
+                    </Link>
+        
+                    <Link href={"/tradeTab"}>
+                      <button
+                        onClick={() => setIsTradeOpen(true)}
+                        className="flex items-center gap-1.5 text-[11px] text-[#cdd5db]"
+                      >
+                        <Wallet2 className="w-5 h-5 text-[#7ce0d5]" />
+                        Trade
+                      </button>
+                    </Link>
+        
+                    <Link href={"/AccountTab"}>
+                      <button className="flex items-center gap-1.5 text-[11px] text-[#cdd5db]">
+                        <UserCircle2 className="w-5 h-5 text-[#7ce0d5]" />
+                        Account
+                      </button>
+                    </Link>
                   </div>
-
-                  </div>
-                  </div>
-
-      {/* Sticky bottom nav (like the screenshot) */}
-      <nav className="fixed bottom-0 inset-x-0 bg-[#0F1A1F] border-t border-[#142028]">
-                <div className="mx-auto w-[355px] max-w-[355px] min-w-[355px] flex items-center justify-around py-2">
-                  <Link href={"/"}>
-                  <button className="flex flex-col items-center gap-1 text-[11px] text-[#cdd5db]">
-                    <BarChart3 className="w-5 h-5 text-[#7ce0d5]" />
-                    Markets
-                  </button>
-                  </Link>
-      
-                  <Link href={"/tradeTab"}>
-                    <button
-                      onClick={() => setIsTradeOpen(true)}
-                      className="flex flex-col items-center gap-1 text-[11px] text-[#cdd5db]"
-                    >
-                      <Wallet2 className="w-5 h-5 text-[#7ce0d5]" />
-                      Trade
-                    </button>
-                  </Link>
-      
-      <Link href={"/AccountTab"}>
-                  <button className="flex flex-col items-center gap-1 text-[11px] text-[#cdd5db]">
-                    <UserCircle2 className="w-5 h-5 text-[#7ce0d5]" />
-                    Account
-                  </button>
-                  </Link>
-                </div>
-              </nav>
-
+                </nav>
       </div>
     </>
   );
 };
 
 export default TradeDrawer;
-

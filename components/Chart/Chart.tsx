@@ -3791,6 +3791,9 @@ const sellOrders = [
   { price: "27.547", size: "0.37", total: "968.34", depth: 55 },
   { price: "27.545", size: "0.37", total: "931.79", depth: 50 },
   { price: "27.543", size: "0.37", total: "895.24", depth: 45 },
+  { price: "27.547", size: "0.37", total: "968.34", depth: 55 },
+  { price: "27.545", size: "0.37", total: "931.79", depth: 50 },
+  { price: "27.543", size: "0.37", total: "895.24", depth: 45 },
 ];
 
 const buyOrders = [
@@ -3798,6 +3801,10 @@ const buyOrders = [
   { price: "27.540", size: "0.37", total: "104.85", depth: 25 },
   { price: "27.538", size: "0.37", total: "824.14", depth: 40 },
   { price: "27.537", size: "0.37", total: "1,709.11", depth: 55 },
+  { price: "27.535", size: "0.37", total: "1,772.64", depth: 65 },
+  { price: "27.533", size: "0.37", total: "1,876.75", depth: 75 },
+  { price: "27.531", size: "0.37", total: "2,052.91", depth: 85 },
+  { price: "27.529", size: "0.37", total: "2,255.42", depth: 90 },
   { price: "27.535", size: "0.37", total: "1,772.64", depth: 65 },
   { price: "27.533", size: "0.37", total: "1,876.75", depth: 75 },
   { price: "27.531", size: "0.37", total: "2,052.91", depth: 85 },
@@ -4800,9 +4807,9 @@ const Chart = ({ session }: { session: any }) => {
       <div className="all_trade_mobile min-h-screen w-full bg-[#0B1518] text-white flex flex-col items-center">
         <Header session={session} />
         {/* Fixed-width card so desktop look doesn't get affected if someone opens it on big screens via dev tools */}
-        <div className="w-[355px] mt-[22px] max-w-[355px] min-w-[100%] bg-[#0F1A1F] border border-[#142028] rounded-lg overflow-hidden shadow-md my-2">
+        <div className="w-[355px] mt-[21px] max-w-[355px] min-w-[100%] bg-[#0F1A1F] border border-[#142028] rounded-lg overflow-hidden shadow-md my-2">
           {/* Header: Pair + Price + Tabs */}
-          <div className="px-3 py-3 border-b border-[#142028]">
+          <div className="px-2 py-1 border-b border-[#142028]">
             <div className="w-full bg-[#0b171f] border-b border-[#142028] text-white">
               {/* Top Row */}
               <div className="px-1 py-1">
@@ -4811,38 +4818,45 @@ const Chart = ({ session }: { session: any }) => {
                   <div className="flex items-center gap-1">
                     {/* <TokenIcon /> */}
                     <svg
-          width="32"
-          height="32"
-          viewBox="0 0 32 32"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          style={{ transform: "translateY(2px)" }}
-          // className="all_trade_mobile"
-        >
-          <g clipPath="url(#clip0_623_29714)">
-            <path
-              d="M20.4523 14.5389C20.471 16.2176 20.1196 17.8218 19.4292 19.3544C18.4434 21.5368 16.0799 23.3213 13.9218 21.4218C12.1616 19.8736 11.8351 16.7306 9.19798 16.2705C5.7088 15.8477 5.62483 19.8923 3.34536 20.3492C0.804661 20.8653 -0.0380915 16.5938 -0.000774032 14.6539C0.0365434 12.714 0.552769 9.98759 2.76072 9.98759C5.30142 9.98759 5.47245 13.8332 8.69731 13.6249C11.8911 13.4073 11.947 9.40624 14.0337 7.69329C15.8343 6.2135 17.952 7.29847 19.0125 9.07982C19.9952 10.7275 20.4274 12.6612 20.4492 14.5389H20.4523Z"
-              fill="#46c4b3"
-            ></path>
-          </g>
-          <defs>
-            <clipPath id="clip0_623_29714">
-              <rect width="115" height="32" fill="white"></rect>
-            </clipPath>
-          </defs>
-        </svg>
-                    <div className="flex flex-col" >
-                      <div className="flex items-center gap-1 text-[15px] font-semibold tracking-wide"
-                      onClick={() => setOpenModel(true)}>
-                        <span className="text-[20px] font-[400]">HYPE/USDC</span>
+                      width="32"
+                      height="32"
+                      viewBox="0 0 32 32"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      style={{ transform: "translateY(2px)" }}
+                      // className="all_trade_mobile"
+                    >
+                      <g clipPath="url(#clip0_623_29714)">
+                        <path
+                          d="M20.4523 14.5389C20.471 16.2176 20.1196 17.8218 19.4292 19.3544C18.4434 21.5368 16.0799 23.3213 13.9218 21.4218C12.1616 19.8736 11.8351 16.7306 9.19798 16.2705C5.7088 15.8477 5.62483 19.8923 3.34536 20.3492C0.804661 20.8653 -0.0380915 16.5938 -0.000774032 14.6539C0.0365434 12.714 0.552769 9.98759 2.76072 9.98759C5.30142 9.98759 5.47245 13.8332 8.69731 13.6249C11.8911 13.4073 11.947 9.40624 14.0337 7.69329C15.8343 6.2135 17.952 7.29847 19.0125 9.07982C19.9952 10.7275 20.4274 12.6612 20.4492 14.5389H20.4523Z"
+                          fill="#46c4b3"
+                        ></path>
+                      </g>
+                      <defs>
+                        <clipPath id="clip0_623_29714">
+                          <rect width="115" height="32" fill="white"></rect>
+                        </clipPath>
+                      </defs>
+                    </svg>
+                    <div className="flex flex-col">
+                      <div
+                        className="flex items-center gap-1 text-[15px] font-semibold tracking-wide"
+                        onClick={() => setOpenModel(true)}
+                      >
+                        <span className="text-[18px] font-[400]">
+                          HYPE/USDC
+                        </span>
                         <ChevronDown className="w-6 h-6 text-[#8b9bb5]" />
                       </div>
                       <div className="text-xs text-teal-300">Spot</div>
                     </div>
-                    <MarketsModel open={openModel} onClose={() => setOpenModel(false)} />
+                    <MarketsModel
+                      open={openModel}
+                      onClose={() => setOpenModel(false)}
+                    />
 
-      {/* Inline keyframes for the modal animations */}
-      <style>{`
+                    {/* Inline keyframes for the modal animations */}
+                    <style>{`
         @keyframes slideUp {
           from { transform: translateY(12px); opacity: 0 }
           to { transform: translateY(0); opacity: 1 }
@@ -4861,9 +4875,9 @@ const Chart = ({ session }: { session: any }) => {
                     aria-expanded={expanded}
                     title="Toggle details"
                   >
-                    <div className="text-right">
+                    <div className="text-left">
                       <div
-                        className={`text-[24px] font-semibold leading-6 ${isUp ? "text-[#46c4b3]" : "text-[#46c4b3]"}`}
+                        className={`text-[20px] font-[400] leading-6 ${isUp ? "text-[#46c4b3]" : "text-[#46c4b3]"}`}
                       >
                         {stats.last}
                       </div>
@@ -4874,21 +4888,27 @@ const Chart = ({ session }: { session: any }) => {
                       </div>
                     </div>
 
-                     <button
-    aria-label="Expand/Collapse"
-    type="button"
-    className="ml-1 flex items-center justify-center w-8 h-8 rounded-md border border-[#1b2b35]"
-    onClick={(e) => {
+                    <button
+                      aria-label="Expand/Collapse"
+                      type="button"
+                      className="ml-1 flex items-center justify-center w-8 h-8 rounded-md border border-[#1b2b35]"
+                      onClick={(e) => {
                         e.stopPropagation();
                         setExpanded((v) => !v);
                       }}
-  >
-    {expanded ? (
-      <ChevronUp size={12} className="stroke-[#8b9bb5]" />
-    ) : (
-      <ChevronDown size={12} className="stroke-[#8b9bb5]" />
-    )}
-  </button>
+                    >
+                      {expanded ? (
+                        <ChevronUp
+                          size={6}
+                          className="w-[24px] stroke-[#8b9bb5]"
+                        />
+                      ) : (
+                        <ChevronDown
+                          size={6}
+                          className="w-[24px] stroke-[#8b9bb5]"
+                        />
+                      )}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -4960,7 +4980,7 @@ const Chart = ({ session }: { session: any }) => {
               </div>
             </div>
 
-            <div className="mt-3 flex items-center gap-6 text-[12px] justify-between">
+            <div className="mt-2 flex items-center gap-6 text-[12px] justify-between">
               {(["Chart", "Order Book", "Trades"] as TopTab[]).map((t) => (
                 <button
                   key={t}
@@ -4982,7 +5002,7 @@ const Chart = ({ session }: { session: any }) => {
             {topTab === "Chart" && (
               <>
                 {/* Mini toolbar (visual) */}
-                <div className="flex items-center gap-3 px-3 py-2 text-[12px] text-[#cdd5db] border-b border-[#142028]">
+                {/* <div className="flex items-center gap-3 px-3 py-2 text-[12px] text-[#cdd5db] border-b border-[#142028]">
                   <div className="flex items-center gap-2">
                     <button className="px-2 py-1 rounded bg-[#162027] border border-[#1c2a33]">
                       5m
@@ -4998,33 +5018,90 @@ const Chart = ({ session }: { session: any }) => {
                     <span className="text-[#93a4ad]">Indicators</span>
                     <span className="text-[#93a4ad]">⋮</span>
                   </div>
-                </div>
+                </div> */}
 
                 {/* TradingView chart (left toolbar on, dark, with volume) */}
                 {/* <div className="px-2 pt-2"> */}
-                <div className="px-2 pt-2">
-                  <div className="h-[420px]">
+                <div className="px-2">
+                  <div className="h-[100%]">
                     <TradingViewChartt
                       symbol="HYPEUSDC"
                       interval="60"
-                      height={420}
+                      height={450}
                     />
                   </div>
                 </div>
                 {/* </div> */}
 
                 {/* Bottom info bar */}
-                <div className="px-3 py-2 flex items-center justify-between text-[12px] text-[#93a4ad] border-t border-[#142028]">
+                {/* <div className="px-3 py-2 flex items-center justify-between text-[12px] text-[#93a4ad] border-t border-[#142028]">
                   <span>Date Range</span>
                   <span>20:08:29 (UTC+5)</span>
                   <span className="flex items-center gap-1">
                     log <span className="text-[#7ce0d5]">auto</span>
                   </span>
-                </div>
+                </div> */}
               </>
             )}
 
             {topTab === "Order Book" && (
+              <div className="px-3 py-3 flex gap-2 w-full">
+                <div style={{width: "50%"}}>
+                <div className="flex justify-between text-[11px] text-[#8b9bb5] pb-2">
+                  <span>Price</span>
+                  {/* <span className="text-right">Size (HYPE)</span> */}
+                  <span className="text-right">Total (HYPE)</span>
+                </div>
+
+                {/* Sell side */}
+                <div className="text-xs">
+                  {sellOrders.map((row, idx) => (
+                    <div
+                      key={`s-${idx}`}
+                      className="relative flex justify-between py-[4px]"
+                    >
+                      <div
+                        className="absolute inset-y-0 right-0 bg-red-500/15"
+                        style={{ width: `${row.depth}%` }}
+                      />
+                      <span className="text-rose-400 z-10">{row.price}</span>
+                      {/* <span className="text-right z-10">{row.size}</span> */}
+                      <span className="text-right z-10">{row.total}</span>
+                    </div>
+                  ))}
+                </div>
+                </div>
+
+                {/* Spread */}
+                <div style={{width: "50%"}}>
+                  <div className="flex justify-between text-[11px] text-[#8b9bb5] pb-2">
+                  {/* <span className="text-right">Size (HYPE)</span> */}
+                  <span className="text-right">Total (HYPE)</span>
+                  <span>Price</span>
+                </div>
+
+                {/* Buy side */}
+                <div className="text-xs">
+                  {buyOrders.map((row, idx) => (
+                    <div
+                      key={`b-${idx}`}
+                      className="relative flex justify-between py-[4px]"
+                    >
+                      <div
+                        className="absolute inset-y-0 left-0 bg-green-500/15"
+                        style={{ width: `${row.depth}%` }}
+                      />
+                      <span className="text-right z-10">{row.total}</span>
+                      <span className="text-emerald-400 z-10">{row.price}</span>
+                      {/* <span className="text-right z-10">{row.size}</span> */}
+                    </div>
+                  ))}
+                </div>
+                </div>
+              </div>
+            )}
+
+            {topTab === "Trades" && (
               <div className="px-3 py-3">
                 <div className="flex justify-between text-[11px] text-[#8b9bb5] pb-2">
                   <span>Price</span>
@@ -5071,35 +5148,6 @@ const Chart = ({ session }: { session: any }) => {
                       <span className="text-emerald-400 z-10">{row.price}</span>
                       <span className="text-right z-10">{row.size}</span>
                       <span className="text-right z-10">{row.total}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {topTab === "Trades" && (
-              <div className="px-3 py-3">
-                <div className="grid grid-cols-3 text-[11px] text-[#8b9bb5] pb-2">
-                  <span>Time</span>
-                  <span className="text-right">Price</span>
-                  <span className="text-right">Size</span>
-                </div>
-                <div className="space-y-1 text-xs">
-                  {recentTrades.map((t, i) => (
-                    <div key={i} className="grid grid-cols-3">
-                      <span className="text-[#cdd5db]">{t.time}</span>
-                      <span
-                        className={`text-right ${
-                          t.side === "buy"
-                            ? "text-emerald-400"
-                            : "text-rose-400"
-                        }`}
-                      >
-                        {t.price}
-                      </span>
-                      <span className="text-right text-[#cdd5db]">
-                        {t.size}
-                      </span>
                     </div>
                   ))}
                 </div>
@@ -5168,9 +5216,9 @@ const Chart = ({ session }: { session: any }) => {
 
         {/* Sticky bottom nav (like the screenshot) */}
         <nav className="fixed bottom-0 inset-x-0 bg-[#0F1A1F] border-t border-[#142028]">
-          <div className="mx-auto w-[355px] max-w-[355px] min-w-[355px] flex items-center justify-around py-2">
+          <div className="mx-auto w-[355px] max-w-[355px] min-w-[355px] flex items-center justify-around py-3">
             <Link href={"/"}>
-              <button className="flex flex-col items-center gap-1 text-[11px] text-[#cdd5db]">
+              <button className="flex items-center gap-1.5 text-[11px] text-[#cdd5db]">
                 <BarChart3 className="w-5 h-5 text-[#7ce0d5]" />
                 Markets
               </button>
@@ -5179,7 +5227,7 @@ const Chart = ({ session }: { session: any }) => {
             <Link href={"/tradeTab"}>
               <button
                 onClick={() => setIsTradeOpen(true)}
-                className="flex flex-col items-center gap-1 text-[11px] text-[#cdd5db]"
+                className="flex items-center gap-1.5 text-[11px] text-[#cdd5db]"
               >
                 <Wallet2 className="w-5 h-5 text-[#7ce0d5]" />
                 Trade
@@ -5187,7 +5235,7 @@ const Chart = ({ session }: { session: any }) => {
             </Link>
 
             <Link href={"/AccountTab"}>
-              <button className="flex flex-col items-center gap-1 text-[11px] text-[#cdd5db]">
+              <button className="flex items-center gap-1.5 text-[11px] text-[#cdd5db]">
                 <UserCircle2 className="w-5 h-5 text-[#7ce0d5]" />
                 Account
               </button>
